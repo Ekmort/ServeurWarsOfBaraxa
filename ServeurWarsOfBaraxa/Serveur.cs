@@ -29,7 +29,6 @@ namespace ServeurWarsOfBaraxa
             
             while (true)
             {
-
                 Connection();
                 Carte[] CarteJoueur = ListerDeckJoueur("ekmort", 1);
                 ////if car si il se deconnecte avant de partir la partis il ne va pas aprtier la partis et revenir ici, donc le if permet de savoir quel client a été deconnect
@@ -85,7 +84,7 @@ namespace ServeurWarsOfBaraxa
         {
             String serveur = "(DESCRIPTION = (ADDRESS_LIST = (ADDRESS = (PROTOCOL = TCP)(HOST = 172.17.104.127)"
             + "(PORT = 1522)))(CONNECT_DATA =(SERVICE_NAME = WarsOfBaraxa)))";
-            connexionChaine = "data source=" + serveur + ";userid=WarsOfBaraxa;password=WarsOfBaraxa";
+            connexionChaine = "data source=" + serveur + ";user id=WarsOfBaraxa;password=WarsOfBaraxa";
             conn = new OracleConnection(connexionChaine);
             conn.Open();
         }
