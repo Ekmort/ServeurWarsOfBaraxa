@@ -32,6 +32,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Oracle.DataAccess, Version=4.121.1.0, Culture=neutral, PublicKeyToken=89b483f429c47342, processorArchitecture=AMD64" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -40,10 +41,7 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
     <Reference Include="warsofbaraxa">
-      <HintPath>..\..\..\Documents\GitHub\warsofbaraxa\warsofbaraxa\bin\Debug\warsofbaraxa.dll</HintPath>
-    </Reference>
-    <Reference Include="WarsOfBaraxaBD">
-      <HintPath>..\..\..\Documents\GitHub\WarsOfBaraxaBD\WarsOfBaraxaBD\bin\Debug\WarsOfBaraxaBD.dll</HintPath>
+      <HintPath>..\..\warsofbaraxa\warsofbaraxa\bin\Debug\warsofbaraxa.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

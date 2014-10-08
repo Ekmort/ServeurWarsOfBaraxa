@@ -1,2 +1,10 @@
 C:\Users\Projet2\Desktop\ServeurWarsOfBaraxa\ServeurWarsOfBaraxa\bin\Debug\ServeurWarsOfBaraxa.exe.config
 C:\Users\Projet2\Documents\GitHub\ServeurWarsOfBaraxa\ServeurWarsOfBaraxa\bin\Debug\ServeurWarsOfBaraxa.exe.config
+C:\Users\Projet2\Documents\GitHub\ServeurWarsOfBaraxa\ServeurWarsOfBaraxa\bin\Debug\ServeurWarsOfBaraxa.exe
+C:\Users\Projet2\Documents\GitHub\ServeurWarsOfBaraxa\ServeurWarsOfBaraxa\bin\Debug\ServeurWarsOfBaraxa.pdb
+C:\Users\Projet2\Documents\GitHub\ServeurWarsOfBaraxa\ServeurWarsOfBaraxa\bin\Debug\warsofbaraxa.dll
+C:\Users\Projet2\Documents\GitHub\ServeurWarsOfBaraxa\ServeurWarsOfBaraxa\bin\Debug\Oracle.DataAccess.dll
+C:\Users\Projet2\Documents\GitHub\ServeurWarsOfBaraxa\ServeurWarsOfBaraxa\bin\Debug\warsofbaraxa.pdb
+C:\Users\Projet2\Documents\GitHub\ServeurWarsOfBaraxa\ServeurWarsOfBaraxa\obj\Debug\ServeurWarsOfBaraxa.csprojResolveAssemblyReference.cache
+C:\Users\Projet2\Documents\GitHub\ServeurWarsOfBaraxa\ServeurWarsOfBaraxa\obj\Debug\ServeurWarsOfBaraxa.exe
+C:\Users\Projet2\Documents\GitHub\ServeurWarsOfBaraxa\ServeurWarsOfBaraxa\obj\Debug\ServeurWarsOfBaraxa.pdb
