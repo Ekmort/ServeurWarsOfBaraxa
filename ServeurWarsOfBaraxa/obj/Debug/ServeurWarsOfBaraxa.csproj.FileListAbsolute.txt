@@ -1,0 +1,2 @@
+C:\Users\Projet2\Desktop\ServeurWarsOfBaraxa\ServeurWarsOfBaraxa\bin\Debug\ServeurWarsOfBaraxa.exe.config
+C:\Users\Projet2\Documents\GitHub\ServeurWarsOfBaraxa\ServeurWarsOfBaraxa\bin\Debug\ServeurWarsOfBaraxa.exe.config
