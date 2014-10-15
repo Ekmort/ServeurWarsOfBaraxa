@@ -44,7 +44,8 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\warsofbaraxa\warsofbaraxa\bin\Debug\warsofbaraxa.dll</HintPath>
     </Reference>
-    <Reference Include="WarsOfBaraxaBD">
+    <Reference Include="WarsOfBaraxaBD, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\WarsOfBaraxaBD\WarsOfBaraxaBD\bin\Debug\WarsOfBaraxaBD.dll</HintPath>
     </Reference>
   </ItemGroup>
@@ -55,6 +56,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Service References\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

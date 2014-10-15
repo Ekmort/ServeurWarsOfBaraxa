@@ -21,6 +21,8 @@ namespace ServeurWarsOfBaraxa
         static private OracleConnection conn;
         static private String connexionChaine;
         private static OracleDataReader dataReader;
+        private static bool Deconnection = false;
+        private static bool partieCommencer = false;
         public Client(Socket socket)
         { 
             sck=socket;
@@ -29,48 +31,58 @@ namespace ServeurWarsOfBaraxa
         {
             acces = new AccesBD();
             acces.Connection();
-            bool Deconnection = false;
-            bool partieCommencer=false;
             while (!Deconnection)
             {
                 if (!partieCommencer)
                 {
                     string message=recevoirResultat(sck);
                     string[] data= message.Split(new char[]{','});
-                    if(data.Length==2)
-                    {
-                        if(acces.estPresent(data[0],data[1]))
-                        {
-                            sendClient(sck,"oui");
-                        }
-                        else
-                        {
-                            sendClient(sck, "non");
-                        }
-                    }
-                    else if (data.Length==4)
-                    {
-                        if (acces.estDejaPresent(data[0]))
-                        {
-                            sendClient(sck, "oui");
-                        }
-                        else
-                        {
-                            sendClient(sck, "non");
-                            acces.ajouter(data[0], data[1], data[2], data[3]);
-
-                        }
-                    }
-                    else 
-                    {
-                        partieCommencer = true;
-                    }
+                    TraiterMessageAvantPartie(data);
                 }
                 else
                 { 
                     
                 }
             }
+        }
+        static private void TraiterMessageAvantPartie(string[] data)
+        {
+            switch (data.Length)
+            {
+                case 1:
+                    partieCommencer = true;
+                break; 
+                case 2:
+                    estPresent(data);
+                break;
+                case 4:
+                    peutEtreAjouter(data);
+                break;
+            }
+        }
+        static private void estPresent(string[] data)
+        {
+            if (acces.estPresent(data[0], data[1]))
+            {
+                sendClient(sck, "oui");
+            }
+            else
+            {
+                sendClient(sck, "non");
+            }        
+        }
+        static private void peutEtreAjouter(string[] data)
+        {
+            if (acces.estDejaPresent(data[0]))
+            {
+                sendClient(sck, "oui");
+            }
+            else
+            {
+                sendClient(sck, "non");
+                acces.ajouter(data[0], data[1], data[2], data[3]);
+
+            }        
         }
         static private void sendDeckJoueurClient()
         {
