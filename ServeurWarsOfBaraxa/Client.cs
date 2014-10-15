@@ -23,6 +23,7 @@ namespace ServeurWarsOfBaraxa
         private static OracleDataReader dataReader;
         private static bool Deconnection = false;
         private static bool partieCommencer = false;
+        private static String User = null;
         public Client(Socket socket)
         { 
             sck=socket;
@@ -84,10 +85,10 @@ namespace ServeurWarsOfBaraxa
 
             }        
         }
-        static private void sendDeckJoueurClient()
+        private void sendDeckJoueurClient(String User)
         {
             acces.Connection();
-            Carte[] CarteJoueur = acces.ListerDeckJoueur("ekmort",1);
+            Carte[] CarteJoueur = acces.ListerDeckJoueur(User,1);
             Deck DeckJoueur = new Deck(CarteJoueur);
             sck = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             IPEndPoint localEndPoint = new IPEndPoint(IPAddress.Parse("172.17.104.127"), 1234);
