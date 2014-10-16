@@ -43,8 +43,19 @@ namespace ServeurWarsOfBaraxa
                     TraiterMessageAvantPartie(data);
                 }
                 else
-                { 
-                    
+                {
+                    Joueur Moi = new Joueur(User);
+                    Joueur Ennemis = new Joueur("Ennemis");
+                    if (aPerdu(Moi))
+                    {
+                        partieCommencer = false;
+                        sendClient(sck,"vous avez perdu");
+                    }
+                    else if (aPerdu(Ennemis))
+                    {
+                        sendClient(sck,"vous avez gagné");
+                        partieCommencer = false;
+                    }
                 }
             }
         }
@@ -53,10 +64,12 @@ namespace ServeurWarsOfBaraxa
             switch (data.Length)
             {
                 case 2:
-                    estPresent(data);
+                    if (estPresent(data))
+                        User = data[0];
                 break;
                 case 4:
-                    peutEtreAjouter(data);
+                    if(peutEtreAjouter(data))
+                    User=data[0];
                 break;
             }
             if(data[0]=="deconnection")
@@ -68,27 +81,31 @@ namespace ServeurWarsOfBaraxa
                 partieCommencer = true;
             }
         }
-        static private void estPresent(string[] data)
+        static private bool estPresent(string[] data)
         {
             if (acces.estPresent(data[0], data[1]))
             {
                 sendClient(sck, "oui");
+                return true;
             }
             else
             {
                 sendClient(sck, "non");
+                return false;
             }        
         }
-        static private void peutEtreAjouter(string[] data)
+        static private bool peutEtreAjouter(string[] data)
         {
             if (acces.estDejaPresent(data[0]))
             {
                 sendClient(sck, "oui");
+                return false;
             }
             else
             {
                 sendClient(sck, "non");
                 acces.ajouter(data[0], data[1], data[2], data[3]);
+                return true;
 
             }        
         }
@@ -146,6 +163,14 @@ namespace ServeurWarsOfBaraxa
                 client.Send(data);
             }
             catch { Console.Write("Erreur de telechargement des donnees"); }
+        }
+        private static bool aPerdu(Joueur player)
+        { 
+            if(player.vie<=0 || player.nbCarteDeck <=0)
+            {
+                return true;
+            }
+            return false;
         }
     }
 }
