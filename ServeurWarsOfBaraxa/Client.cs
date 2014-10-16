@@ -27,6 +27,8 @@ namespace ServeurWarsOfBaraxa
         public Client(Socket socket)
         { 
             sck=socket;
+            Deconnection = false;
+            partieCommencer = false;
         }
         public void doWork()
         {
@@ -50,15 +52,20 @@ namespace ServeurWarsOfBaraxa
         {
             switch (data.Length)
             {
-                case 1:
-                    partieCommencer = true;
-                break; 
                 case 2:
                     estPresent(data);
                 break;
                 case 4:
                     peutEtreAjouter(data);
                 break;
+            }
+            if(data[0]=="deconnection")
+            {
+                Deconnection = true;
+            }
+            else if (data[0] == "commencerPartie")
+            {
+                partieCommencer = true;
             }
         }
         static private void estPresent(string[] data)
