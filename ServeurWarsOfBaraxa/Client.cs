@@ -50,10 +50,12 @@ namespace ServeurWarsOfBaraxa
                     {
                         partieCommencer = false;
                         sendClient(sck,"vous avez perdu");
+                        acces.AjouterDefaite(User);
                     }
                     else if (aPerdu(Ennemis))
                     {
                         sendClient(sck,"vous avez gagné");
+                        acces.AjouterVictoire(User);
                         partieCommencer = false;
                     }
                 }
@@ -64,8 +66,12 @@ namespace ServeurWarsOfBaraxa
             switch (data.Length)
             {
                 case 2:
-                    if (estPresent(data))
-                        User = data[0];
+                if(data[0] == "afficher profil")
+                {
+                    sendProfil(data[1]);
+                }
+                else if (estPresent(data))
+                    User = data[0];
                 break;
                 case 4:
                     if(peutEtreAjouter(data))
@@ -163,6 +169,11 @@ namespace ServeurWarsOfBaraxa
                 client.Send(data);
             }
             catch { Console.Write("Erreur de telechargement des donnees"); }
+        }
+        private static void sendProfil(string alias)
+        {
+            string profile=acces.getProfil(alias);
+            sendClient(sck, profile);
         }
         private static bool aPerdu(Joueur player)
         { 

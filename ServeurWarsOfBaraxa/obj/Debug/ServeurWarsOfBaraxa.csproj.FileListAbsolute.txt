@@ -19,5 +19,12 @@ C:\Users\200666155\Documents\GitHub\ServeurWarsOfBaraxa\ServeurWarsOfBaraxa\bin\
 C:\Users\200666155\Documents\GitHub\ServeurWarsOfBaraxa\ServeurWarsOfBaraxa\bin\Debug\WarsOfBaraxaBD.dll
 C:\Users\200666155\Documents\GitHub\ServeurWarsOfBaraxa\ServeurWarsOfBaraxa\bin\Debug\WarsOfBaraxaBD.pdb
 C:\Users\201240453\Desktop\GitHub\ServeurWarsOfBaraxa\ServeurWarsOfBaraxa\bin\Debug\ServeurWarsOfBaraxa.exe.config
+C:\Users\201240453\Desktop\GitHub\ServeurWarsOfBaraxa\ServeurWarsOfBaraxa\bin\Debug\ServeurWarsOfBaraxa.exe
+C:\Users\201240453\Desktop\GitHub\ServeurWarsOfBaraxa\ServeurWarsOfBaraxa\bin\Debug\ServeurWarsOfBaraxa.pdb
+C:\Users\201240453\Desktop\GitHub\ServeurWarsOfBaraxa\ServeurWarsOfBaraxa\bin\Debug\warsofbaraxa.dll
+C:\Users\201240453\Desktop\GitHub\ServeurWarsOfBaraxa\ServeurWarsOfBaraxa\bin\Debug\WarsOfBaraxaBD.dll
+C:\Users\201240453\Desktop\GitHub\ServeurWarsOfBaraxa\ServeurWarsOfBaraxa\bin\Debug\warsofbaraxa.pdb
+C:\Users\201240453\Desktop\GitHub\ServeurWarsOfBaraxa\ServeurWarsOfBaraxa\bin\Debug\WarsOfBaraxaBD.pdb
+C:\Users\201240453\Desktop\GitHub\ServeurWarsOfBaraxa\ServeurWarsOfBaraxa\obj\Debug\ServeurWarsOfBaraxa.csprojResolveAssemblyReference.cache
 C:\Users\201240453\Desktop\GitHub\ServeurWarsOfBaraxa\ServeurWarsOfBaraxa\obj\Debug\ServeurWarsOfBaraxa.exe
 C:\Users\201240453\Desktop\GitHub\ServeurWarsOfBaraxa\ServeurWarsOfBaraxa\obj\Debug\ServeurWarsOfBaraxa.pdb
