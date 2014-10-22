@@ -23,6 +23,7 @@ C:\Users\201240453\Desktop\GitHub\ServeurWarsOfBaraxa\ServeurWarsOfBaraxa\bin\De
 C:\Users\201240453\Desktop\GitHub\ServeurWarsOfBaraxa\ServeurWarsOfBaraxa\bin\Debug\ServeurWarsOfBaraxa.pdb
 C:\Users\201240453\Desktop\GitHub\ServeurWarsOfBaraxa\ServeurWarsOfBaraxa\bin\Debug\warsofbaraxa.dll
 C:\Users\201240453\Desktop\GitHub\ServeurWarsOfBaraxa\ServeurWarsOfBaraxa\bin\Debug\WarsOfBaraxaBD.dll
+C:\Users\201240453\Desktop\GitHub\ServeurWarsOfBaraxa\ServeurWarsOfBaraxa\bin\Debug\UnityEngine.dll
 C:\Users\201240453\Desktop\GitHub\ServeurWarsOfBaraxa\ServeurWarsOfBaraxa\bin\Debug\warsofbaraxa.pdb
 C:\Users\201240453\Desktop\GitHub\ServeurWarsOfBaraxa\ServeurWarsOfBaraxa\bin\Debug\WarsOfBaraxaBD.pdb
 C:\Users\201240453\Desktop\GitHub\ServeurWarsOfBaraxa\ServeurWarsOfBaraxa\obj\Debug\ServeurWarsOfBaraxa.csprojResolveAssemblyReference.cache

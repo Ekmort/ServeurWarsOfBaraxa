@@ -16,19 +16,21 @@ namespace ServeurWarsOfBaraxa
 {
     class Client
     {
-        static Socket sck;
+        static private Joueur Moi;
+        static private Joueur Ennemis; 
         static AccesBD acces;
         static private OracleConnection conn;
         static private String connexionChaine;
         private static OracleDataReader dataReader;
         private static bool Deconnection = false;
         private static bool partieCommencer = false;
-        private static String User = null;
-        public Client(Socket socket)
-        { 
-            sck=socket;
+        private static int posClient;
+        public Client(Joueur temp,int pos)
+        {
+            Moi= new Joueur(temp.nom,temp.sckJoueur);
             Deconnection = false;
             partieCommencer = false;
+            posClient=pos;
         }
         public void doWork()
         {
@@ -38,24 +40,22 @@ namespace ServeurWarsOfBaraxa
             {
                 if (!partieCommencer)
                 {
-                    string message=recevoirResultat(sck);
+                    string message=recevoirResultat(Moi.sckJoueur);
                     string[] data= message.Split(new char[]{','});
                     TraiterMessageAvantPartie(data);
                 }
                 else
                 {
-                    Joueur Moi = new Joueur(User);
-                    Joueur Ennemis = new Joueur("Ennemis");
                     if (aPerdu(Moi))
                     {
                         partieCommencer = false;
-                        sendClient(sck,"vous avez perdu");
-                        acces.AjouterDefaite(User);
+                        sendClient(Moi.sckJoueur,"vous avez perdu");
+                        acces.AjouterDefaite(Moi.nom);
                     }
                     else if (aPerdu(Ennemis))
                     {
-                        sendClient(sck,"vous avez gagné");
-                        acces.AjouterVictoire(User);
+                        sendClient(Moi.sckJoueur, "vous avez gagné");
+                        acces.AjouterVictoire(Moi.nom);
                         partieCommencer = false;
                     }
                 }
@@ -71,45 +71,104 @@ namespace ServeurWarsOfBaraxa
                     sendProfil(data[1]);
                 }
                 else if (estPresent(data))
-                    User = data[0];
+                   Moi.nom = data[0];
                 break;
                 case 4:
                     if(peutEtreAjouter(data))
-                    User=data[0];
+                    Moi.nom=data[0];
                 break;
             }
-            if(data[0]=="deconnection")
-            {
-                Deconnection = true;
-            }
-            else if (data[0] == "commencerPartie")
-            {
+            switch (data[0])
+            { 
+                case "deconnection":
+                    Deconnection = true;
+                    Serveur.tabJoueur.Remove(Moi);
+                break;
+                case "recevoir Deck":
+                    sendDeck(Moi.nom);
+                break;
+                case "trouver partie":
+                if(startGame(Moi.sckJoueur, posClient))
                 partieCommencer = true;
+                break;
             }
+        }
+        static private bool startGame(Socket client, int pos)
+        {
+            Serveur.tabPartie.Add(Moi);
+            bool rechercher = true;
+            while (rechercher && Serveur.tabPartie.Count<2)
+            {
+                sendClient(Moi.sckJoueur, "recherche");
+                string message = recevoirResultat(Moi.sckJoueur);
+                if (message == "deconnection")
+                {
+                    rechercher = false;
+                    Deconnection = true;
+                    Serveur.tabJoueur.Remove(Moi);
+                    Serveur.tabPartie.Remove(Moi);
+                } 
+            }
+            if (rechercher)
+            {
+                if (Serveur.temp1 == null)
+                    Serveur.temp1 = new Joueur(Serveur.tabPartie[0].nom, Serveur.tabPartie[0].sckJoueur);
+                if (Serveur.temp2 == null)
+                    Serveur.temp2 = new Joueur(Serveur.tabPartie[1].nom, Serveur.tabPartie[1].sckJoueur);
+                if (Serveur.temp1.nom == Serveur.tabPartie[0].nom)
+                    Ennemis = new Joueur(Serveur.tabPartie[1].nom, Serveur.tabPartie[1].sckJoueur);
+                else
+                    Ennemis = new Joueur(Serveur.tabPartie[0].nom, Serveur.tabPartie[0].sckJoueur);
+
+                Serveur.tabPartie.Remove(Moi);
+                if (Ennemis != null)
+                {
+                    sendClient(Moi.sckJoueur, "Partie Commencer,contre joueur: " + Ennemis.sckJoueur.LocalEndPoint);
+                    return true;
+                }
+                else
+                {
+                    startGame(client, pos);
+                }
+            }
+            else
+            {
+                return false;
+            }
+            return true;
         }
         static private bool estPresent(string[] data)
         {
-            if (acces.estPresent(data[0], data[1]))
+            if (acces.estPresent(data[0], data[1]) && !estConnecter(data[0]))
             {
-                sendClient(sck, "oui");
+                sendClient(Moi.sckJoueur, "oui");
                 return true;
             }
             else
             {
-                sendClient(sck, "non");
+                sendClient(Moi.sckJoueur, "non");
                 return false;
             }        
+        }
+        static private bool estConnecter(string alias)
+        {
+            for (int i = 0; i < Serveur.tabJoueur.Count; ++i)
+            {
+                if (Serveur.tabJoueur[i].nom == alias)
+                    return true;
+            }
+            return false;
         }
         static private bool peutEtreAjouter(string[] data)
         {
             if (acces.estDejaPresent(data[0]))
             {
-                sendClient(sck, "oui");
+                sendClient(Moi.sckJoueur, "oui");
                 return false;
             }
             else
             {
-                sendClient(sck, "non");
+                sendClient(Moi.sckJoueur, "non");
                 acces.ajouter(data[0], data[1], data[2], data[3]);
                 return true;
 
@@ -120,18 +179,18 @@ namespace ServeurWarsOfBaraxa
             acces.Connection();
             Carte[] CarteJoueur = acces.ListerDeckJoueur(User,1);
             Deck DeckJoueur = new Deck(CarteJoueur);
-            sck = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            //sck = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             IPEndPoint localEndPoint = new IPEndPoint(IPAddress.Parse("172.17.104.127"), 1234);
             try
             {
-                sck.Connect(localEndPoint);
+                //sck.Connect(localEndPoint);
             }
             catch
             {
                 System.Console.Write("Erreur de connexion");
             }
 
-            if (sck.Connected)
+            /*if (sck.Connected)
             {
                 byte[] data;
                 BinaryFormatter b = new BinaryFormatter();
@@ -141,7 +200,7 @@ namespace ServeurWarsOfBaraxa
                     data = stream.ToArray();
                 }
                 sck.Send(data);
-            }
+            }*/
         }
         private static string recevoirResultat(Socket client)
         {
@@ -149,7 +208,7 @@ namespace ServeurWarsOfBaraxa
             try
             {
                 byte[] buff = new byte[client.SendBufferSize];
-                int bytesRead = sck.Receive(buff);
+                int bytesRead = Moi.sckJoueur.Receive(buff);
                 byte[] formatted = new byte[bytesRead];
                 for (int i = 0; i < bytesRead; i++)
                 {
@@ -173,7 +232,7 @@ namespace ServeurWarsOfBaraxa
         private static void sendProfil(string alias)
         {
             string profile=acces.getProfil(alias);
-            sendClient(sck, profile);
+            sendClient(Moi.sckJoueur, profile);
         }
         private static bool aPerdu(Joueur player)
         { 
@@ -182,6 +241,14 @@ namespace ServeurWarsOfBaraxa
                 return true;
             }
             return false;
+        }
+        private static void sendDeck(string alias)
+        {
+            string deck = acces.getDeckJoueur(alias);
+            if (deck != "")
+                sendClient(Moi.sckJoueur, deck);
+            else
+                sendClient(Moi.sckJoueur, "aucun deck");
         }
     }
 }
