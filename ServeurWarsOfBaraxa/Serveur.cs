@@ -17,6 +17,8 @@ namespace ServeurWarsOfBaraxa
     {
         public static Joueur temp1 = null;
         public static Joueur temp2 = null;
+        public static int joueurDepart = 0;
+
         public static List<Joueur> tabJoueur;
         public static List<Joueur> tabPartie;
         public static Mutex mutex;

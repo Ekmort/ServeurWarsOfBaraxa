@@ -17,7 +17,7 @@ namespace ServeurWarsOfBaraxa
     class Client
     {
         private Joueur Moi;
-        private Joueur Ennemis; 
+        private Joueur Ennemis;
         AccesBD acces;
         private OracleConnection conn;
         private String connexionChaine;
@@ -47,6 +47,7 @@ namespace ServeurWarsOfBaraxa
                 }
                 else
                 {
+                    premierTour();
                     if (aPerdu(Moi))
                     {
                         partieCommencer = false;
@@ -62,6 +63,29 @@ namespace ServeurWarsOfBaraxa
                 }
             }
         }
+        private void premierTour()
+        {
+            getFirstPlayer();
+        }
+        private void getFirstPlayer()
+        {
+            Serveur.mutex.WaitOne();
+            if(Serveur.joueurDepart ==0)
+                Serveur.joueurDepart = new Random().Next(1,2);
+            if (Serveur.joueurDepart == Moi.nbDepart)
+            {
+                sendClient(Moi.sckJoueur, "Premier Joueur");
+                Moi.Depart = true;
+            }
+            else
+            {
+                sendClient(Moi.sckJoueur, "Deuxieme Joueur");
+                Moi.Depart = false;
+            }
+            Serveur.mutex.ReleaseMutex();
+            Thread.Sleep(500);
+            Serveur.joueurDepart = 0;
+        }
         private void TraiterMessageAvantPartie(string[] data)
         {
             switch (data.Length)
@@ -75,8 +99,11 @@ namespace ServeurWarsOfBaraxa
                    Moi.nom = data[0];
                 break;
                 case 4:
-                    if(peutEtreAjouter(data))
-                    Moi.nom=data[0];
+                if (peutEtreAjouter(data))
+                {
+                    Moi.nom = data[0];
+                    ajouterBasicDeck(Moi.nom);
+                }
                 break;
             }
             switch (data[0])
@@ -93,6 +120,10 @@ namespace ServeurWarsOfBaraxa
                 partieCommencer = true;
                 break;
             }
+        }
+        private void ajouterBasicDeck(string alias)
+        {
+            acces.setBasicDeck(alias);
         }
         private bool startGame(Socket client, int pos)
         {
@@ -146,9 +177,15 @@ namespace ServeurWarsOfBaraxa
                 J2 = new Joueur(Serveur.tabPartie[1].nom);
 
             if (J1.nom == Moi.nom)
+            {
                 Ennemis = Serveur.tabPartie[1];
+                Moi.nbDepart = 1;
+            }
             else if (J2.nom == Moi.nom)
+            {
                 Ennemis = Serveur.tabPartie[0];
+                Moi.nbDepart = 2;
+            }
             else
                 Ennemis = null;
             Console.WriteLine("thread:" + Thread.CurrentThread.Name);
