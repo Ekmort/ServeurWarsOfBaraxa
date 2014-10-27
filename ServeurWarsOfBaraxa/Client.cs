@@ -24,6 +24,7 @@ namespace ServeurWarsOfBaraxa
         private OracleDataReader dataReader;
         private bool Deconnection = false;
         private bool partieCommencer = false;
+        bool Debut = true;
         private int posClient;
         public Client(Joueur temp)
         {
@@ -47,25 +48,119 @@ namespace ServeurWarsOfBaraxa
                 }
                 else
                 {
-                    premierTour();
-                    if (aPerdu(Moi))
+                    if(Debut)
+                    AvantMatch();
+
+                    if (Moi.Depart)
                     {
-                        partieCommencer = false;
-                        sendClient(Moi.sckJoueur,"vous avez perdu");
-                        acces.AjouterDefaite(Moi.nom);
+                        DebutTour();
+                        Tour();
+                        if (aPerdu(Moi))
+                        {
+                            partieCommencer = false;
+                            sendClient(Moi.sckJoueur, "vous avez perdu");
+                            acces.AjouterDefaite(Moi.nom);
+                        }
+                        else if (aPerdu(Ennemis))
+                        {
+                            sendClient(Moi.sckJoueur, "vous avez gagné");
+                            acces.AjouterVictoire(Moi.nom);
+                            partieCommencer = false;
+                        }
                     }
-                    else if (aPerdu(Ennemis))
-                    {
-                        sendClient(Moi.sckJoueur, "vous avez gagné");
-                        acces.AjouterVictoire(Moi.nom);
-                        partieCommencer = false;
-                    }
+
                 }
             }
         }
-        private void premierTour()
+        //trouve le joueur et lui permet de mulligan(pas encore fait le mulligan)
+        private void AvantMatch()
         {
             getFirstPlayer();
+            //mulligan but not now
+            Debut = false;
+            Serveur.messageEnnemis = "Joueur2";
+        }
+        //pige une carte et apres fait les trigger de carte si il y en a(rien de faite)
+        private void DebutTour()
+        { 
+            //pick a card
+            //if ability trigger ds debut tour faire
+            //then tour
+        }
+        private void Tour()
+        {
+            bool FinTour = false;
+            while (!FinTour)
+            {
+                string message = recevoirResultat(Moi.sckJoueur);
+                string[] data = message.Split(new char[] { ',' });
+                traiterMessagePartie(data);
+            };
+        }
+        private void traiterMessagePartie(string[] data)
+        {
+            switch (data[0])
+            { 
+                case "Ajouter Mana":
+                    setMana(Moi,int.Parse(data[1]),int.Parse(data[2]),int.Parse(data[3]));
+                    sendClient(Ennemis.sckJoueur,"AjouterManaEnnemis,"+Moi.nbBle+","+ Moi.nbBois+","+ Moi.nbGem);
+                break;
+                case "Jouer Carte":
+                    Carte temp = ReceiveCarte(Moi.sckJoueur);
+                    EnleverMana(Moi, temp);
+                    sendClient(Ennemis.sckJoueur, "AjouterCarteEnnemis," + Moi.nbBle + "," + Moi.nbBois + "," + Moi.nbGem);
+                    EnvoyerCarte(Ennemis.sckJoueur,temp);
+                break;
+                case "Fin De Tour":
+                    Moi.Depart = false;
+                    Ennemis.Depart = true;
+                    sendClient(Ennemis.sckJoueur, "Tour Commencer");
+                break;
+
+                case "Attaquer Joueur":
+                    Carte attaquant = ReceiveCarte(Moi.sckJoueur);
+                    Ennemis.vie -= attaquant.perm.Attaque;
+                    sendClient(Ennemis.sckJoueur, "Joueur attaquer," + Ennemis.vie.ToString());
+                break;
+                case "Attaquer Creature":
+                    Carte maCreature = ReceiveCarte(Moi.sckJoueur);
+                    Carte saCreature = ReceiveCarte(Moi.sckJoueur);
+                break;
+            }
+        }
+        private Carte ReceiveCarte(Socket client)
+        {
+            Carte carte = null;
+            try
+            {
+                byte [] buffer = new byte[client.SendBufferSize];
+                int bytesRead = client.Receive(buffer);
+                byte[] formatted = new byte[bytesRead];
+                BinaryFormatter receive = new BinaryFormatter();
+
+                for (int i = 0; i < bytesRead; i++)
+                {
+                    formatted[i] = buffer[i];
+                }
+                using (var recstream = new MemoryStream(formatted))
+                {
+                    carte = receive.Deserialize(recstream) as Carte;
+                }
+
+            }
+            catch { Console.Write("Erreur de telechargement des données"); }
+            return carte;
+        }
+        private void EnvoyerCarte(Socket client, Carte carte)
+        {
+            byte[] data;
+            BinaryFormatter b = new BinaryFormatter();
+            using (var stream = new MemoryStream())
+            {
+                b.Serialize(stream, carte);
+                data = stream.ToArray();
+            }
+            client.Send(data); 
         }
         private void getFirstPlayer()
         {
@@ -145,12 +240,12 @@ namespace ServeurWarsOfBaraxa
             Serveur.mutex.ReleaseMutex();
             if (rechercher)
             {
-                    setPartie(Serveur.temp1, Serveur.temp2);
+                    setPartie();
                     if (Ennemis != null)
                     {
                         Serveur.mutex.WaitOne();
                         Serveur.mutex.ReleaseMutex();
-                        Thread.Sleep(500);
+                        Thread.Sleep(1500);
                         Serveur.tabPartie.Remove(Moi);
                         sendClient(Moi.sckJoueur, "Partie Commencer");
                         Serveur.temp1 = null;
@@ -169,26 +264,45 @@ namespace ServeurWarsOfBaraxa
             }
             return true;
         }
-        private void setPartie(Joueur J1,Joueur J2)
+        private void EnleverMana(Joueur j, Carte c)
         {
-            if (J1 == null)
-                J1 = new Joueur(Serveur.tabPartie[0].nom);
-            if (J2 == null)
-                J2 = new Joueur(Serveur.tabPartie[1].nom);
-
-            if (J1.nom == Moi.nom)
+            j.nbBle -= c.CoutBle;
+            j.nbBois -= c.CoutBois;
+            j.nbGem -= c.CoutGem;
+        }
+        private void ajouterMana(Joueur j,int ble,int bois, int gem)
+        {
+            j.nbBle += ble;
+            j.nbBois += bois;
+            j.nbGem += gem;
+        }
+        private void setMana(Joueur j,int ble,int bois,int gem)
+        {
+            j.nbBle = ble;
+            j.nbBois = bois;
+            j.nbGem = gem;
+        }
+        private void setPartie()
+        {
+            Serveur.mutex.WaitOne();
+                if (Serveur.temp1 == null && Serveur.tabPartie.Count >= 2)
+                    Serveur.temp1 = new Joueur(Serveur.tabPartie[0].nom);
+                if (Serveur.temp2 == null && Serveur.temp1.nom != Moi.nom && Serveur.tabPartie.Count >= 2)
+                    Serveur.temp2 = new Joueur(Serveur.tabPartie[1].nom);
+            Serveur.mutex.ReleaseMutex();
+            Thread.Sleep(500);
+            if (Serveur.temp1.nom == Moi.nom)
             {
                 Ennemis = Serveur.tabPartie[1];
                 Moi.nbDepart = 1;
             }
-            else if (J2.nom == Moi.nom)
+            else if (Serveur.temp2.nom == Moi.nom)
             {
                 Ennemis = Serveur.tabPartie[0];
                 Moi.nbDepart = 2;
             }
             else
                 Ennemis = null;
-            Console.WriteLine("thread:" + Thread.CurrentThread.Name);
         }
         private bool estPresent(string[] data)
         {
@@ -303,5 +417,6 @@ namespace ServeurWarsOfBaraxa
             else
                 sendClient(Moi.sckJoueur, "aucun deck");
         }
+
     }
 }
