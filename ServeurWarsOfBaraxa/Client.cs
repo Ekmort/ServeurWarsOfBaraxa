@@ -171,10 +171,7 @@ namespace ServeurWarsOfBaraxa
         }
         private void getFirstPlayer()
         {
-            Thread.CurrentThread.Join(20);
-            if(Serveur.joueurDepart ==0)
-                Serveur.joueurDepart = new Random().Next(1,2);
-            Serveur.mutex.WaitOne();
+            Serveur.joueurDepart = 1;
             if (Serveur.joueurDepart == Moi.nbDepart)
             {
                 sendClient(Moi.sckJoueur, "Premier Joueur");
@@ -185,8 +182,6 @@ namespace ServeurWarsOfBaraxa
                 sendClient(Moi.sckJoueur, "Deuxieme Joueur");
                 Moi.Depart = false;
             }
-            Serveur.mutex.ReleaseMutex();
-            Serveur.joueurDepart = 0;
         }
         private void TraiterMessageAvantPartie(string[] data)
         {
