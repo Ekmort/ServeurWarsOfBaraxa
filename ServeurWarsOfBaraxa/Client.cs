@@ -18,7 +18,6 @@ namespace ServeurWarsOfBaraxa
     {
         private Joueur Moi;
         private Joueur Ennemis;
-        private int pos;
         AccesBD acces;
         private OracleConnection conn;
         private String connexionChaine;
@@ -33,7 +32,7 @@ namespace ServeurWarsOfBaraxa
             Moi = temp;
             Deconnection = false;
             partieCommencer = false;
-            pos = posT;
+            posClient = posT;
           
         }
         public void doWork()
@@ -275,19 +274,20 @@ namespace ServeurWarsOfBaraxa
             {
                     setPartie();
                     if (Ennemis != null)
-                    {  
-                        sendClient(Moi.sckJoueur, "Partie Commencer");
-
-                        if (Thread.CurrentThread.Name == "joueur" + pos.ToString())
+                    {
+                        /*if (Thread.CurrentThread.Name == "joueur" + posClient.ToString() && !Serveur.Waiting)
                         {
+                            Serveur.Waiting = true;
                             Serveur.mutPartie1.ReleaseMutex();
                             Serveur.mutPartie2.WaitOne();
                         }
-                        else if (Thread.CurrentThread.Name == "joueur" + pos.ToString())
+                        else if (Thread.CurrentThread.Name == "joueur" + posClient.ToString())
                         {
                             Serveur.mutPartie2.ReleaseMutex();
                             Serveur.mutPartie1.WaitOne();
-                        }
+                            Serveur.Waiting = false;
+                        }*/
+                        sendClient(Moi.sckJoueur, "Partie Commencer");
                         Serveur.tabPartie.Remove(Moi);
                         Serveur.temp1 = null;
                         Serveur.temp2 = null;
@@ -329,7 +329,7 @@ namespace ServeurWarsOfBaraxa
                     Serveur.temp1 = new Joueur(Serveur.tabPartie[0].nom);
                 if (Serveur.temp2 == null && Serveur.temp1.nom != Moi.nom && Serveur.tabPartie.Count >= 2)
                     Serveur.temp2 = new Joueur(Serveur.tabPartie[1].nom);
-                           
+           
             if (Serveur.temp1 != null && Serveur.temp1.nom == Moi.nom)
             {
                 Ennemis = Serveur.tabPartie[1];
@@ -342,7 +342,8 @@ namespace ServeurWarsOfBaraxa
             }
             else
                 Ennemis = null;
-            Thread.Sleep(500);
+
+            Thread.Sleep(1000);
         }
         private bool estPresent(string[] data)
         {
