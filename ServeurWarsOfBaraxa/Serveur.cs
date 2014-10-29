@@ -23,9 +23,13 @@ namespace ServeurWarsOfBaraxa
         public static List<Joueur> tabJoueur;
         public static List<Joueur> tabPartie;
         public static Mutex mutex;
+        public static Mutex mutPartie1;
+        public static Mutex mutPartie2;
         static void Main(string[] args)
         {
             mutex = new Mutex();
+            mutPartie1 = new Mutex();
+            mutPartie2 = new Mutex();
             Socket sck = null;
             tabJoueur = new List<Joueur>();
             tabPartie = new List<Joueur>();
@@ -40,7 +44,7 @@ namespace ServeurWarsOfBaraxa
                tabJoueur[tabJoueur.Count - 1].sckJoueur = sck.Accept();              
                 Console.WriteLine("Joueur connecté");               
                // Client client = new Client(tabJoueur[tabJoueur.Count - 1]);
-                t = new Thread(new Client(tabJoueur[tabJoueur.Count - 1]).doWork);
+                t = new Thread(new Client(tabJoueur[tabJoueur.Count - 1],tabJoueur.Count).doWork);
                 t.Name = "joueur" + tabJoueur.Count;
                 t.Start();   
             }
