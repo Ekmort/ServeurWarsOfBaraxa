@@ -50,6 +50,7 @@ namespace ServeurWarsOfBaraxa
                 }
                 else
                 {
+                    //------------------------PROBLE A REGLER DEMAIN COMBAT CREATURE ET FREEZE ENNEMIS APRES FIN DE PARTIE---------------------------------
                     if(Debut)
                     AvantMatch();
 
@@ -57,22 +58,48 @@ namespace ServeurWarsOfBaraxa
                     {
                         DebutTour();
                         Tour();
-                        if (aPerdu(Moi))
-                        {
-                            partieCommencer = false;
-                            sendClient(Moi.sckJoueur, "vous avez perdu");
-                            acces.AjouterDefaite(Moi.nom);
-                        }
-                        else if (aPerdu(Ennemis))
-                        {
-                            sendClient(Moi.sckJoueur, "vous avez gagné");
-                            acces.AjouterVictoire(Moi.nom);
-                            partieCommencer = false;
-                        }
-                    }
 
+                    }
+                    else
+                    {
+                        verifiervictoireEnnemis();
+                    }
                 }
             }
+        }
+        private bool verifierVictoire()
+        {
+            if (aPerdu(Moi))
+            {
+                partieCommencer = false;
+                
+                sendClient(Moi.sckJoueur, "vous avez perdu");
+                sendClient(Ennemis.sckJoueur, "vous avez gagné");
+                acces.AjouterDefaite(Moi.nom);
+                return true;
+            }
+            else if (aPerdu(Ennemis))
+            {
+                sendClient(Moi.sckJoueur, "vous avez gagné");
+                sendClient(Ennemis.sckJoueur, "vous avez perdu");
+                acces.AjouterVictoire(Moi.nom);
+                partieCommencer = false;
+                return true;
+            }
+            return false;
+        }
+        private void verifiervictoireEnnemis()
+        {
+            if (aPerdu(Moi))
+            {
+                partieCommencer = false;
+                acces.AjouterDefaite(Moi.nom);
+            }
+            else if (aPerdu(Ennemis))
+            {
+                acces.AjouterVictoire(Moi.nom);
+                partieCommencer = false;
+            }            
         }
         //trouve le joueur et lui permet de mulligan(pas encore fait le mulligan)
         private void AvantMatch()
@@ -94,9 +121,12 @@ namespace ServeurWarsOfBaraxa
             while (!FinTour)
             {
                 string message = recevoirResultat(Moi.sckJoueur);
-                string[] data = message.Split(new char[] { ',' });
+                    string[] data = message.Split(new char[] { ',' });
                 traiterMessagePartie(data);
-            };
+                    FinTour = verifierVictoire();
+                    if (!FinTour && data[0] == "Fin De Tour")
+                        FinTour = true;
+            }
         }
         private void traiterMessagePartie(string[] data)
         {
@@ -129,6 +159,7 @@ namespace ServeurWarsOfBaraxa
                     +","+data[14] + "," + data[15] + "," + data[16] + "," + data[17] + "," + data[18] + "," + data[19] + "," + data[20] + "," + data[21] + "," + data[22] + "," + data[23] + "," + data[24]);
                 break;
             }
+
         }
         private string SetCarteString(Carte temp)
         {
