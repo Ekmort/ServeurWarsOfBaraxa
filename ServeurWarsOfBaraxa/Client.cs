@@ -83,7 +83,7 @@ namespace ServeurWarsOfBaraxa
         //pige une carte et apres fait les trigger de carte si il y en a(rien de faite)
         private void DebutTour()
         { 
-            //pick a card
+            //sendClient(Ennemis.sckJoueur,,"piger");   A FAIRE!!!!!
             //if ability trigger ds debut tour faire
             //then tour
         }
