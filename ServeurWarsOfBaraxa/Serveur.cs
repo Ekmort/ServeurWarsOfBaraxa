@@ -19,6 +19,7 @@ namespace ServeurWarsOfBaraxa
         public static Joueur temp2 = null;
         public static string messageEnnemis = "";
         public static int joueurDepart = 0;
+        public static bool Waiting=false;
 
         public static List<Joueur> tabJoueur;
         public static List<Joueur> tabPartie;
