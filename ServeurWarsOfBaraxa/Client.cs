@@ -120,7 +120,7 @@ namespace ServeurWarsOfBaraxa
             while (!FinTour)
             {
                 string message = recevoirResultat(Moi.sckJoueur);
-                    string[] data = message.Split(new char[] { ',' });
+                    string[] data = message.Split(new char[] { '.' });
                 traiterMessagePartie(data);
                     FinTour = verifierVictoire();
                     if (!FinTour && data[0] == "Fin De Tour")
@@ -133,13 +133,13 @@ namespace ServeurWarsOfBaraxa
             { 
                 case "Ajouter Mana":
                     setMana(Moi,int.Parse(data[1]),int.Parse(data[2]),int.Parse(data[3]));
-                    sendClient(Ennemis.sckJoueur,"AjouterManaEnnemis,"+Moi.nbBle+","+ Moi.nbBois+","+ Moi.nbGem);
+                    sendClient(Ennemis.sckJoueur,"AjouterManaEnnemis."+Moi.nbBle+"."+ Moi.nbBois+"."+ Moi.nbGem);
                 break;
                 case "Jouer Carte":
                     Carte temp = ReceiveCarte(Moi.sckJoueur);
                     EnleverMana(Moi, temp);
                     string fckingCarte = SetCarteString(temp);
-                    sendClient(Ennemis.sckJoueur, "AjouterCarteEnnemis,"+ fckingCarte);
+                    sendClient(Ennemis.sckJoueur, "AjouterCarteEnnemis."+ fckingCarte);
                 break;
                 case "Fin De Tour":
                     Moi.Depart = false;
@@ -150,12 +150,12 @@ namespace ServeurWarsOfBaraxa
                 case "Attaquer Joueur":
                     Carte attaquant = ReceiveCarte(Moi.sckJoueur);
                     Ennemis.vie -= attaquant.perm.Attaque;
-                    sendClient(Ennemis.sckJoueur, "Joueur attaquer," + Ennemis.vie.ToString());
+                    sendClient(Ennemis.sckJoueur, "Joueur attaquer." + Ennemis.vie.ToString());
                 break;
                 case "Attaquer Creature":
-                    sendClient(Ennemis.sckJoueur, "Combat Creature,"+data[1]+","+data[2]
-                    +","+data[3] + ","+data[4]  +","+data[5] +","+data[6] +","+data[7]  +","+data[8]  +","+data[9]  +","+data[10]  +","+data[11] + ","+data[12]  +","+data[13]
-                    +","+data[14] + "," + data[15] + "," + data[16] + "," + data[17] + "," + data[18] + "," + data[19] + "," + data[20] + "," + data[21] + "," + data[22] + "," + data[23] + "," + data[24]);
+                    sendClient(Ennemis.sckJoueur, "Combat Creature."+data[1]+"."+data[2]
+                    +"."+data[3] + "."+data[4]  +"."+data[5] +"."+data[6] +"."+data[7]  +"."+data[8]  +"."+data[9]  +"."+data[10]  +"."+data[11] + "."+data[12]  +"."+data[13]
+                    +"."+data[14] + "." + data[15] + "." + data[16] + "." + data[17] + "." + data[18] + "." + data[19] + "." + data[20] + "." + data[21] + "." + data[22] + "." + data[23] + "." + data[24]);
                 break;
             }
 
@@ -163,7 +163,7 @@ namespace ServeurWarsOfBaraxa
         private string SetCarteString(Carte temp)
         {
                     /*0                 1               2                   3                   4               5                   6                     7                 8                   9               10*/
-            return temp.CoutBle+","+temp.CoutBois+","+temp.CoutGem+","+temp.Habilete+","+temp.TypeCarte+","+temp.NomCarte+","+temp.NoCarte+","+temp.perm.Attaque+","+temp.perm.Vie+","+temp.perm.Armure+","+temp.perm.TypePerm; 
+            return temp.CoutBle+"."+temp.CoutBois+"."+temp.CoutGem+"."+temp.Habilete+"."+temp.TypeCarte+"."+temp.NomCarte+"."+temp.NoCarte+"."+temp.perm.Attaque+"."+temp.perm.Vie+"."+temp.perm.Armure+"."+temp.perm.TypePerm; 
         }
         private Carte ReceiveCarte(Socket client)
         {
