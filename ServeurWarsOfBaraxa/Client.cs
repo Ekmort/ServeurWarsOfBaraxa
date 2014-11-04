@@ -149,7 +149,11 @@ namespace ServeurWarsOfBaraxa
 
                 case "Attaquer Joueur":
                     Carte attaquant = ReceiveCarte(Moi.sckJoueur);
-                    Ennemis.vie -= attaquant.perm.Attaque;
+                    setHabilete(attaquant);
+                    if(attaquant.perm.estAttaquePuisante)
+                        Ennemis.vie -= attaquant.perm.Attaque*2;
+                    else
+                        Ennemis.vie -= attaquant.perm.Attaque;
                     sendClient(Ennemis.sckJoueur, "Joueur attaquer." + Ennemis.vie.ToString());
                 break;
                 case "Attaquer Creature":
@@ -159,6 +163,23 @@ namespace ServeurWarsOfBaraxa
                 break;
             }
 
+        }
+        private Carte setHabilete(Carte card)
+        {
+            if (card.Habilete != "" && card.Habilete != null)
+            {
+                string[] data = card.Habilete.Split(new char[] { ',' });
+                for (int i = 0; i < data.Length; ++i)
+                {
+                    if (card.esthabileteNormal(data[i]))
+                        card.setHabileteNormal(data[i]);
+                    else
+                    {
+                        /*set habilete special*/
+                    }
+                }
+            }
+            return card;
         }
         private string SetCarteString(Carte temp)
         {
