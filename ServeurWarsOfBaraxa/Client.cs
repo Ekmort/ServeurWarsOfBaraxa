@@ -17,6 +17,7 @@ namespace ServeurWarsOfBaraxa
     class Client
     {
         private Joueur Moi;
+        private Deck monDeck;
         private Joueur Ennemis;
         AccesBD acces;
         private OracleConnection conn;
@@ -26,6 +27,7 @@ namespace ServeurWarsOfBaraxa
         private bool partieCommencer = false;
         bool Debut = true;
         private int posClient;
+        private string NomDeck="";
         public Client(Joueur temp,int posT)
         {
             
@@ -49,7 +51,6 @@ namespace ServeurWarsOfBaraxa
                 }
                 else
                 {
-                    //------------------------PROBLE A REGLER DEMAIN COMBAT CREATURE ET FREEZE ENNEMIS APRES FIN DE PARTIE---------------------------------
                     if(Debut)
                     AvantMatch();
 
@@ -103,8 +104,8 @@ namespace ServeurWarsOfBaraxa
         //trouve le joueur et lui permet de mulligan(pas encore fait le mulligan)
         private void AvantMatch()
         {
+            sendDeckJoueurClient();
             getFirstPlayer();
-            //mulligan but not now
             Debut = false;
         }
         //pige une carte et apres fait les trigger de carte si il y en a(rien de faite)
@@ -160,6 +161,9 @@ namespace ServeurWarsOfBaraxa
                     sendClient(Ennemis.sckJoueur, "Combat Creature."+data[1]+"."+data[2]
                     +"."+data[3] + "."+data[4]  +"."+data[5] +"."+data[6] +"."+data[7]  +"."+data[8]  +"."+data[9]  +"."+data[10]  +"."+data[11] + "."+data[12]  +"."+data[13]
                     +"."+data[14] + "." + data[15] + "." + data[16] + "." + data[17] + "." + data[18] + "." + data[19] + "." + data[20] + "." + data[21] + "." + data[22] + "." + data[23] + "." + data[24]);
+                break;
+                case "Piger":
+                    sendClient(Ennemis.sckJoueur, "Ennemis pige."+ data[1] + "." + data[2] + "." + data[3] + "." + data[4] + "." + data[5] + "." + data[6] + "." + data[7] + "." + data[8] + "." + data[9] + "." + data[10] + "." + data[11]);
                 break;
             }
 
@@ -220,9 +224,21 @@ namespace ServeurWarsOfBaraxa
             }
             client.Send(data); 
         }
+        private void envoyerDeck(Socket client, Deck leDeck)
+        {
+            byte[] data;
+            BinaryFormatter b = new BinaryFormatter();
+            using (var stream = new MemoryStream())
+            {
+                b.Serialize(stream, leDeck);
+                data = stream.ToArray();
+            }
+            client.Send(data);         
+        }
         private void getFirstPlayer()
         {
             Serveur.joueurDepart = 1;
+            Thread.Sleep(3000);
             if (Serveur.joueurDepart == Moi.nbDepart)
             {
                 sendClient(Moi.sckJoueur, "Premier Joueur");
@@ -264,8 +280,15 @@ namespace ServeurWarsOfBaraxa
                     sendDeck(Moi.nom);
                 break;
                 case "trouver partie":
-                if (startGame(Moi.sckJoueur, posClient))
-                partieCommencer = true;
+                    NomDeck = data[1];
+                    int numDeck=acces.getNoDeck(NomDeck);
+                    if (numDeck != -1)
+                    {
+                        Carte[] CarteJoueur = acces.ListerDeckJoueur(Moi.nom, numDeck);
+                        monDeck = new Deck(CarteJoueur);
+                    }
+                    if (startGame(Moi.sckJoueur, posClient))
+                        partieCommencer = true;
                 break;
             }
         }
@@ -299,13 +322,12 @@ namespace ServeurWarsOfBaraxa
                         /*if (Thread.CurrentThread.Name == "joueur" + posClient.ToString() && !Serveur.Waiting)
                         {
                             Serveur.Waiting = true;
-                            Serveur.mutPartie1.ReleaseMutex();
-                            Serveur.mutPartie2.WaitOne();
+                            Serveur.mutPartie1.WaitOne();
+                            //Serveur.mutPartie1.WaitOne();
                         }
                         else if (Thread.CurrentThread.Name == "joueur" + posClient.ToString())
                         {
-                            Serveur.mutPartie2.ReleaseMutex();
-                            Serveur.mutPartie1.WaitOne();
+                            Serveur.mutPartie1.ReleaseMutex();
                             Serveur.Waiting = false;
                         }*/
                         sendClient(Moi.sckJoueur, "Partie Commencer");
@@ -403,33 +425,9 @@ namespace ServeurWarsOfBaraxa
 
             }        
         }
-        private void sendDeckJoueurClient(String User)
+        private void sendDeckJoueurClient()
         {
-            acces.Connection();
-            Carte[] CarteJoueur = acces.ListerDeckJoueur(User,1);
-            Deck DeckJoueur = new Deck(CarteJoueur);
-            //sck = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            IPEndPoint localEndPoint = new IPEndPoint(IPAddress.Parse("172.17.104.127"), 1234);
-            try
-            {
-                //sck.Connect(localEndPoint);
-            }
-            catch
-            {
-                System.Console.Write("Erreur de connexion");
-            }
-
-            /*if (sck.Connected)
-            {
-                byte[] data;
-                BinaryFormatter b = new BinaryFormatter();
-                using (var stream = new MemoryStream())
-                {
-                    b.Serialize(stream, DeckJoueur);
-                    data = stream.ToArray();
-                }
-                sck.Send(data);
-            }*/
+            envoyerDeck(Moi.sckJoueur, monDeck);
         }
         private  string recevoirResultat(Socket client)
         {
