@@ -111,7 +111,6 @@ namespace ServeurWarsOfBaraxa
         //pige une carte et apres fait les trigger de carte si il y en a(rien de faite)
         private void DebutTour()
         { 
-            //sendClient(Ennemis.sckJoueur,"Piger");
             //if ability trigger ds debut tour faire
             //then tour
         }
@@ -140,7 +139,7 @@ namespace ServeurWarsOfBaraxa
                     Carte temp = ReceiveCarte(Moi.sckJoueur);
                     EnleverMana(Moi, temp);
                     string fckingCarte = SetCarteString(temp);
-                    sendClient(Ennemis.sckJoueur, "AjouterCarteEnnemis."+ fckingCarte);
+                    sendClient(Ennemis.sckJoueur, "AjouterCarteEnnemis."+data[1]+"."+fckingCarte);
                 break;
                 case "Fin De Tour":
                     Moi.Depart = false;
@@ -163,7 +162,7 @@ namespace ServeurWarsOfBaraxa
                     +"."+data[14] + "." + data[15] + "." + data[16] + "." + data[17] + "." + data[18] + "." + data[19] + "." + data[20] + "." + data[21] + "." + data[22] + "." + data[23] + "." + data[24]);
                 break;
                 case "Piger":
-                    sendClient(Ennemis.sckJoueur, "Ennemis pige."+ data[1] + "." + data[2] + "." + data[3] + "." + data[4] + "." + data[5] + "." + data[6] + "." + data[7] + "." + data[8] + "." + data[9] + "." + data[10] + "." + data[11]);
+                    sendClient(Ennemis.sckJoueur, "Ennemis pige");
                 break;
             }
 
