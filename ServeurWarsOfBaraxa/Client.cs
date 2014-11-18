@@ -136,6 +136,20 @@ namespace ServeurWarsOfBaraxa
                     setMana(Moi,int.Parse(data[1]),int.Parse(data[2]),int.Parse(data[3]));
                     sendClient(Ennemis.sckJoueur,"AjouterManaEnnemis."+Moi.nbBle+"."+ Moi.nbBois+"."+ Moi.nbGem);
                 break;
+                case "Jouer spellnotarget":
+                    Carte zeSpell = ReceiveCarte(Moi.sckJoueur);
+                    EnleverMana(Moi, zeSpell);
+                    string spellString = SetCarteString(zeSpell);
+                    sendClient(Ennemis.sckJoueur, "spellNoTarget."+data[1]+"."+spellString);
+                break;
+                case "Jouer spellTarget":
+                    Carte zeSpelltarget = ReceiveCarte(Moi.sckJoueur);
+                    Carte zeTarget = ReceiveCarte(Moi.sckJoueur);
+                    EnleverMana(Moi, zeSpelltarget);
+                    string spelltargetString = SetCarteString(zeSpelltarget);
+                    string targetString = SetCarteString(zeTarget);
+                    sendClient(Ennemis.sckJoueur, "spellwithtarget." + data[1] + "." + data[2]+"."+spelltargetString+"."+targetString);
+                break;
                 case "Jouer Carte":
                     Carte temp = ReceiveCarte(Moi.sckJoueur);
                     EnleverMana(Moi, temp);
