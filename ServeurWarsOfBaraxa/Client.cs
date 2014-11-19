@@ -87,7 +87,8 @@ namespace ServeurWarsOfBaraxa
             NomDeck="";
             monDeck = null;
             Ennemis = null;
-            Debut = false;
+            Debut = true;
+
         }
         private void verifiervictoireEnnemis()
         {
