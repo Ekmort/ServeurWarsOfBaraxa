@@ -259,9 +259,9 @@ namespace ServeurWarsOfBaraxa
         }
         private void getFirstPlayer()
         {
-            Serveur.mutex.WaitOne();
+            Serveur.inGame.WaitOne();
             Serveur.games[posPartie].setRandom();
-            Serveur.mutex.ReleaseMutex();
+            Serveur.inGame.ReleaseMutex();
             int posIndex = Serveur.getPosIndex(posClient, posPartie);
             if (Serveur.games[posPartie].rand == posIndex+1)
             {
@@ -309,7 +309,9 @@ namespace ServeurWarsOfBaraxa
                     int numDeck=acces.getNoDeck(NomDeck);
                     if (numDeck != -1)
                     {
+                        Serveur.mutPartie1.WaitOne();
                         Carte[] CarteJoueur = acces.ListerDeckJoueur(Moi.nom, numDeck);
+                        Serveur.mutPartie1.ReleaseMutex();
                         monDeck = new Deck(CarteJoueur);
                     }
                     if (startGame(posClient))
@@ -323,11 +325,12 @@ namespace ServeurWarsOfBaraxa
         }
         private bool startGame(int pos)
         {
-
+            Serveur.mutPartie2.WaitOne();
             posPartie = Serveur.AjouterJoueurPartie(pos);
+            Serveur.mutPartie2.ReleaseMutex();
             bool rechercher = true;
             Serveur.mutex.WaitOne();
-            while (rechercher && !Serveur.partieComplete())
+            while (rechercher && !Serveur.partieComplete(posPartie))
             {
                 sendClient(Moi.sckJoueur, "recherche");
                 string message = recevoirResultat(Moi.sckJoueur);
@@ -346,9 +349,6 @@ namespace ServeurWarsOfBaraxa
                     if (Ennemis != null)
                     {
                         sendClient(Moi.sckJoueur, "Partie Commencer");
-                        Serveur.mutex.WaitOne();
-                        Serveur.NouvelleGame();
-                        Serveur.mutex.ReleaseMutex();
                         return true;
                     }
                     else
@@ -391,14 +391,17 @@ namespace ServeurWarsOfBaraxa
         }
         private bool estPresent(string[] data)
         {
+            Serveur.mutPartie1.WaitOne();
             if (acces.estPresent(data[0], data[1]) && !estConnecter(data[0]))
             {
                 sendClient(Moi.sckJoueur, "oui");
+                Serveur.mutPartie1.ReleaseMutex();
                 return true;
             }
             else
             {
                 sendClient(Moi.sckJoueur, "non");
+                Serveur.mutPartie1.ReleaseMutex();
                 return false;
             }        
         }
@@ -413,15 +416,18 @@ namespace ServeurWarsOfBaraxa
         }
          private bool peutEtreAjouter(string[] data)
         {
+            Serveur.mutPartie1.WaitOne();
             if (acces.estDejaPresent(data[0]))
             {
                 sendClient(Moi.sckJoueur, "oui");
+                Serveur.mutPartie1.ReleaseMutex();
                 return false;
             }
             else
             {
                 sendClient(Moi.sckJoueur, "non");
                 acces.ajouter(data[0], data[1], data[2], data[3]);
+                Serveur.mutPartie1.ReleaseMutex();
                 return true;
 
             }        
@@ -459,8 +465,10 @@ namespace ServeurWarsOfBaraxa
         }
         private  void sendProfil(string alias)
         {
+            Serveur.mutPartie1.WaitOne();
             string profile=acces.getProfil(alias);
             sendClient(Moi.sckJoueur, profile);
+            Serveur.mutPartie1.ReleaseMutex();
         }
         private  bool aPerdu(Joueur player)
         { 

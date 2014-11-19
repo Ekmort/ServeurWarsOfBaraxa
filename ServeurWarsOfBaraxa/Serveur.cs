@@ -29,6 +29,7 @@ namespace ServeurWarsOfBaraxa
         public static Mutex mutex;
         public static Mutex mutPartie1;
         public static Mutex mutPartie2;
+        public static Mutex inGame;
         public static int NoGameCourant;
 
         static void Main(string[] args)
@@ -36,6 +37,7 @@ namespace ServeurWarsOfBaraxa
             mutex = new Mutex();
             mutPartie1 = new Mutex();
             mutPartie2 = new Mutex();
+            inGame = new Mutex();
             Socket sck = null;
             tabJoueur = new List<Joueur>();
             tabPartie = new List<Joueur>();
@@ -64,9 +66,9 @@ namespace ServeurWarsOfBaraxa
         static public int getPosIndex(int pos,int posgame)
         {
             if (games[posgame].indexJoueur[0] == pos)
-                return games[posgame].indexJoueur[0];
+                return 0;
             else if (games[posgame].indexJoueur[1] == pos)
-                return games[posgame].indexJoueur[1];
+                return 1;
             else
                 return -1;
         }
@@ -89,7 +91,11 @@ namespace ServeurWarsOfBaraxa
                 games[NoGameCourant].indexJoueur[0] = pos;
             else
                 games[NoGameCourant].indexJoueur[1] = pos;
-            return NoGameCourant;
+            int numPartie = NoGameCourant;
+            if (partieComplete(NoGameCourant))
+                Serveur.NouvelleGame();
+
+            return numPartie;
         }
         static public void enleverJoueurPartie(int pos)
         {
@@ -98,9 +104,9 @@ namespace ServeurWarsOfBaraxa
             else if (games[NoGameCourant].indexJoueur[1] == pos)
                 games[NoGameCourant].indexJoueur[1] = -1;            
         }
-        static public bool partieComplete()
+        static public bool partieComplete(int posgame)
         {
-            return games[NoGameCourant].indexJoueur[0] != -1 && games[NoGameCourant].indexJoueur[1] != -1;
+            return games[posgame].indexJoueur[0] != -1 && games[posgame].indexJoueur[1] != -1;
         }
         static public void NouvelleGame()
         {
