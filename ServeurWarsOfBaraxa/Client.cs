@@ -184,6 +184,13 @@ namespace ServeurWarsOfBaraxa
                     sendClient(Ennemis.sckJoueur, "Carte manquante");
                     Serveur.games[posPartie].PuCarte = true;
                 break;
+                case "deconnection":
+                    Deconnection = true;
+                    Serveur.tabJoueur[posClient] = null;
+                    Moi = null;
+                    sendClient(Ennemis.sckJoueur, "Carte manquante");
+                    Serveur.games[posPartie].PuCarte = true;
+                break;
             }
 
         }
@@ -283,14 +290,22 @@ namespace ServeurWarsOfBaraxa
                 {
                     sendProfil(data[1]);
                 }
+                else if (data[0] == "afficher profil Joueur")
+                {
+                    sendProfil(data[1]);
+                }
                 else if (estPresent(data))
-                   Moi.nom = data[0];
+                {
+                    Moi.nom = data[0];
+                    Console.WriteLine("Joueur connecté:" + Moi.nom + " , " + Moi.sckJoueur.RemoteEndPoint.ToString() + " , " + posClient);
+                }
                 break;
                 case 4:
                 if (peutEtreAjouter(data))
                 {
                     Moi.nom = data[0];
                     ajouterBasicDeck(Moi.nom);
+                    Console.WriteLine("Joueur connecté:" + Moi.nom + "," + Moi.sckJoueur.RemoteEndPoint.ToString());
                 }
                 break;
             }
@@ -298,8 +313,8 @@ namespace ServeurWarsOfBaraxa
             { 
                 case "deconnection":
                     Deconnection = true;
+                    Serveur.tabJoueur[posClient] = null;
                     Moi = null;
-                    Serveur.tabJoueur.Remove(Moi);
                 break;
                 case "recevoir Deck":
                     sendDeck(Moi.nom);
@@ -338,7 +353,7 @@ namespace ServeurWarsOfBaraxa
                 {
                     rechercher = false;
                     Deconnection = true;
-                    Serveur.tabJoueur.Remove(Moi);
+                    Serveur.tabJoueur[posClient] = null;
                     Serveur.enleverJoueurPartie(pos);
                 }
             }
@@ -467,7 +482,14 @@ namespace ServeurWarsOfBaraxa
         {
             Serveur.mutPartie1.WaitOne();
             string profile=acces.getProfil(alias);
-            sendClient(Moi.sckJoueur, profile);
+            if (profile != null)
+            {
+                sendClient(Moi.sckJoueur, profile);
+            }
+            else
+            {
+                sendClient(Moi.sckJoueur, "non");
+            }
             Serveur.mutPartie1.ReleaseMutex();
         }
         private  bool aPerdu(Joueur player)
