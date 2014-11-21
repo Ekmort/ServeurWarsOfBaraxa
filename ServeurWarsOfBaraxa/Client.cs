@@ -129,6 +129,30 @@ namespace ServeurWarsOfBaraxa
                     FinTour = true;
             }
         }
+        private bool ifHeroDmg(string[] textHabilete)
+        {
+            bool valide = false; int i = 0;
+            while(!valide || i < textHabilete.Length)
+            {
+                if (textHabilete[i] == "aux" && textHabilete[i] == "ennemis")
+                    valide = true;
+                else if (textHabilete[i] == "place" && textHabilete[i + 1] == "de" && textHabilete[i + 2] == "combat")
+                    valide = true;
+                i++;
+            }
+            return valide;
+        }
+        private bool ifSelfHeroDmg(string[] textHabilete)
+        {
+            bool valide = false; int i = 0;
+            while (!valide || i < textHabilete.Length)
+            {
+                if (textHabilete[i] == "place" && textHabilete[i + 1] == "de" && textHabilete[i + 2] == "combat")
+                    valide = true;
+                i++;
+            }
+            return valide;
+        }
         private void traiterMessagePartie(string[] data)
         {
             switch (data[0])
@@ -140,16 +164,39 @@ namespace ServeurWarsOfBaraxa
                 case "Jouer spellnotarget":
                     Carte zeSpell = ReceiveCarte(Moi.sckJoueur);
                     EnleverMana(Moi, zeSpell);
+                    if (zeSpell.Habilete.Split(new char[] { ' ' })[0] == "Inflige")
+                    {
+                        if (ifHeroDmg(zeSpell.Habilete.Split(new char[] { ' ' })))
+                            Ennemis.vie -= int.Parse(zeSpell.Habilete.Split(new char[] { ' ' })[1]);
+                        if(ifSelfHeroDmg(zeSpell.Habilete.Split(new char[] { ' ' })))
+                            Moi.vie -= int.Parse(zeSpell.Habilete.Split(new char[] { ' ' })[1]);
+                    }
                     string spellString = SetCarteString(zeSpell);
                     sendClient(Ennemis.sckJoueur, "spellNoTarget."+data[1]+"."+spellString);
                 break;
                 case "Jouer spellTarget":
                     Carte zeSpelltarget = ReceiveCarte(Moi.sckJoueur);
-                    Carte zeTarget = ReceiveCarte(Moi.sckJoueur);
                     EnleverMana(Moi, zeSpelltarget);
-                    string spelltargetString = SetCarteString(zeSpelltarget);
-                    string targetString = SetCarteString(zeTarget);
-                    sendClient(Ennemis.sckJoueur, "spellwithtarget." + data[1] + "." + data[2]+"."+spelltargetString+"."+targetString);
+                    if (data[2] == "hero ennemis" || data[2] == "hero")
+                    {
+                        if (zeSpelltarget.Habilete.Split(new char[] { ' ' })[0] == "Inflige")
+                        {
+                            if (data[2] == "hero")
+                                Moi.vie -= int.Parse(zeSpelltarget.Habilete.Split(new char[] { ' ' })[1]);
+                            else
+                                Ennemis.vie -= int.Parse(zeSpelltarget.Habilete.Split(new char[] { ' ' })[1]);
+
+                            string spelltargetString = SetCarteString(zeSpelltarget);
+                            sendClient(Ennemis.sckJoueur, "spellwithtarget." + data[1] +"." + data[2] + "." + spelltargetString);
+                        }
+                    }
+                    else
+                    {
+                        Carte zeTarget = ReceiveCarte(Moi.sckJoueur);
+                        string spelltargetString = SetCarteString(zeSpelltarget);
+                        string targetString = SetCarteString(zeTarget);
+                        sendClient(Ennemis.sckJoueur, "spellwithtarget." + data[1] + "." + data[2] + "." + spelltargetString + "." + targetString);
+                    }
                 break;
                 case "Jouer Carte":
                     Carte temp = ReceiveCarte(Moi.sckJoueur);
