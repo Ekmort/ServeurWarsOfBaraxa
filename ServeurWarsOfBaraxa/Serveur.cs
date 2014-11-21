@@ -54,14 +54,32 @@ namespace ServeurWarsOfBaraxa
 
             while (true)
             {
-               tabJoueur.Add(new Joueur("joueur"));
-               tabJoueur[tabJoueur.Count - 1].sckJoueur = sck.Accept();              
-                Console.WriteLine("Joueur connecté");               
+                int numpossible= trouverPlaceJoueur();
+               if(numpossible ==-1)
+               {
+                   tabJoueur.Add(new Joueur("joueur"));
+                   numpossible = tabJoueur.Count - 1;
+                   tabJoueur[numpossible].sckJoueur = sck.Accept();  
+               }
+               else
+               {
+                    tabJoueur[numpossible] = new Joueur("joueur");
+                    tabJoueur[numpossible].sckJoueur = sck.Accept();
+               }               
                // Client client = new Client(tabJoueur[tabJoueur.Count - 1]);
-                t = new Thread(new Client(tabJoueur[tabJoueur.Count - 1],tabJoueur.Count-1).doWork);
+                t = new Thread(new Client(tabJoueur[numpossible],numpossible).doWork);
                 t.Name = "joueur" + tabJoueur.Count;
                 t.Start();   
             }
+        }
+        static public int trouverPlaceJoueur()
+        {
+            for (int i = 0; i < tabJoueur.Count; ++i)
+            {
+                if (tabJoueur[i] == null)
+                    return i;
+            }
+            return -1;
         }
         static public int getPosIndex(int pos,int posgame)
         {
