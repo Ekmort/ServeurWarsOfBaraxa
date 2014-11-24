@@ -19,6 +19,8 @@ namespace ServeurWarsOfBaraxa
         private Joueur Moi;
         private Deck monDeck;
         private Joueur Ennemis;
+        private Thread t;
+        ThreadLire ReceiveMessage;
         AccesBD acces;
         private bool Deconnection = false;
         private bool partieCommencer = false;
@@ -33,6 +35,8 @@ namespace ServeurWarsOfBaraxa
             Deconnection = false;
             partieCommencer = false;
             posClient = posT;
+            ReceiveMessage = new ThreadLire();
+            ReceiveMessage.workSocket = Moi.sckJoueur;
           
         }
         public void doWork()
@@ -53,9 +57,33 @@ namespace ServeurWarsOfBaraxa
                     AvantMatch();
 
                     if (Moi.Depart)
+                    {
+                        if (t != null && t.IsAlive)
+                        {
+                            t.Abort();
+                        }
                         Tour();
+                    }
                     else
                     {
+                        if (t == null)
+                        {
+                            t = new Thread(ReceiveMessage.doWork);
+                            t.Start();
+                        }
+                        else
+                        {
+                            if (!t.IsAlive && !Deconnection)
+                            {
+                                t = new Thread(ReceiveMessage.doWork);
+                                t.Start();
+                            }
+                        }
+                        if (ReceiveMessage.message != "")
+                        {
+                            traiterMessagePartie(ReceiveMessage.message.Split(new char[] {'.'}));
+                            ReceiveMessage.message = "";
+                        }
                         verifiervictoireEnnemis();
                     }
                 }
@@ -63,21 +91,27 @@ namespace ServeurWarsOfBaraxa
         }
         private bool verifierVictoire()
         {
-            if (aPerdu(Moi) || Serveur.games[posPartie].PuCarte)
+            if (Moi != null)
             {
-                partieCommencer = false;
-                acces.AjouterDefaite(Moi.nom);
-                Serveur.games[posPartie].TerminerGame();
-                resetPartie();
-                return true;
+                if (aPerdu(Moi) || Serveur.games[posPartie].PuCarte)
+                {
+                    partieCommencer = false;
+                    acces.AjouterDefaite(Moi.nom);
+                    Serveur.games[posPartie].TerminerGame();
+                    resetPartie();
+                    return true;
+                }
             }
-            else if (aPerdu(Ennemis))
+            if (Ennemis != null)
             {
-                acces.AjouterVictoire(Moi.nom);
-                Serveur.games[posPartie].TerminerGame();
-                resetPartie();
-                partieCommencer = false;
-                return true;
+                if (aPerdu(Ennemis))
+                {
+                    acces.AjouterVictoire(Moi.nom);
+                    Serveur.games[posPartie].TerminerGame();
+                    resetPartie();
+                    partieCommencer = false;
+                    return true;
+                }
             }
                 return false;
         }
@@ -92,20 +126,23 @@ namespace ServeurWarsOfBaraxa
         }
         private void verifiervictoireEnnemis()
         {
-            if (aPerdu(Moi))
+            if (Moi != null && Ennemis != null)
             {
-                partieCommencer = false;
-                acces.AjouterDefaite(Moi.nom);
-                Serveur.games[posPartie].TerminerGame();
-                resetPartie();
+                if (aPerdu(Moi))
+                {
+                    partieCommencer = false;
+                    acces.AjouterDefaite(Moi.nom);
+                    Serveur.games[posPartie].TerminerGame();
+                    resetPartie();
+                }
+                else if (aPerdu(Ennemis) || Serveur.games[posPartie].PuCarte)
+                {
+                    acces.AjouterVictoire(Moi.nom);
+                    partieCommencer = false;
+                    Serveur.games[posPartie].TerminerGame();
+                    resetPartie();
+                }
             }
-            else if (aPerdu(Ennemis) || Serveur.games[posPartie].PuCarte)
-            {
-                acces.AjouterVictoire(Moi.nom);
-                partieCommencer = false;
-                Serveur.games[posPartie].TerminerGame();
-                resetPartie();
-            }            
         }
         //trouve le joueur et lui permet de mulligan(pas encore fait le mulligan)
         private void AvantMatch()
@@ -237,6 +274,11 @@ namespace ServeurWarsOfBaraxa
                     Moi = null;
                     sendClient(Ennemis.sckJoueur, "Carte manquante");
                     Serveur.games[posPartie].PuCarte = true;
+                    if(t!= null&&t.IsAlive)
+                    {
+                        t.Abort();
+                        t = null;
+                    }
                 break;
             }
 
@@ -379,6 +421,9 @@ namespace ServeurWarsOfBaraxa
                     if (startGame(posClient))
                         partieCommencer = true;
                 break;
+                case "RetourMenu":
+                    Moi.nom = "Joueur";
+                break;
             }
         }
         private void ajouterBasicDeck(string alias)
@@ -471,7 +516,7 @@ namespace ServeurWarsOfBaraxa
         {
             for (int i = 0; i < Serveur.tabJoueur.Count; ++i)
             {
-                if (Serveur.tabJoueur[i].nom == alias)
+                if (Serveur.tabJoueur[i] != null && Serveur.tabJoueur[i].nom == alias)
                     return true;
             }
             return false;
@@ -541,7 +586,7 @@ namespace ServeurWarsOfBaraxa
         }
         private  bool aPerdu(Joueur player)
         { 
-            if(player.vie<=0)
+            if(player != null && player.vie<=0)
             {
                 return true;
             }
