@@ -83,21 +83,25 @@ namespace ServeurWarsOfBaraxa
         }
         static public int getPosIndex(int pos,int posgame)
         {
-            if (games[posgame].indexJoueur[0] == pos)
-                return 0;
-            else if (games[posgame].indexJoueur[1] == pos)
-                return 1;
-            else
+            if (posgame != -1 && pos != -1)
+            {
+                if (games[posgame].indexJoueur[0] == pos)
+                    return 0;
+                else if (games[posgame].indexJoueur[1] == pos)
+                    return 1;
+            }
                 return -1;
         }
         static public int findEnnemis(int pos,int posGame)
         {
-            if (games[posGame].indexJoueur[0] == pos)
-                return games[posGame].indexJoueur[1];
-            else if (games[posGame].indexJoueur[1] == pos)
-                return games[posGame].indexJoueur[0];
-            else
-                return -1;
+            if (pos != -1 && posGame != -1)
+            {
+                if (games[posGame].indexJoueur[0] == pos)
+                    return games[posGame].indexJoueur[1];
+                else if (games[posGame].indexJoueur[1] == pos)
+                    return games[posGame].indexJoueur[0];
+            }
+            return -1;
         }
         static public Joueur getEnnemis(int pos)
         {
@@ -157,6 +161,18 @@ namespace ServeurWarsOfBaraxa
             }
             return -1;
         }
+        static public void ennemiPart(int numjoueur,int numPartie)
+        { 
+            if(numjoueur==0)
+                games[numPartie].joueurpart[1] =true;
+            else if(numjoueur ==1)
+                games[numPartie].joueurpart[0] = true;
+        }
+        static public void JoueurPart(int numjoueur, int numPartie)
+        {
+            if(numPartie ==0 || numPartie==1)
+                games[numPartie].joueurpart[numjoueur] = true;
+        }
 
     }
     class gameEtat
@@ -166,6 +182,7 @@ namespace ServeurWarsOfBaraxa
         public bool inactif;
         public int[] indexJoueur;
         public int rand;
+        public bool[] joueurpart;
 
         public gameEtat()
         {
@@ -175,9 +192,11 @@ namespace ServeurWarsOfBaraxa
             indexJoueur = new int[2];
             indexJoueur[0] = -1;
             indexJoueur[1] = -1;
+            joueurpart = new bool[2];
+            joueurpart[0] = false;
+            joueurpart[1] = false;
             rand = -1;
         }
-
         public void TerminerGame()
         {
             inactif = true;

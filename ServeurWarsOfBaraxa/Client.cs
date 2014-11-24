@@ -66,24 +66,6 @@ namespace ServeurWarsOfBaraxa
                     }
                     else
                     {
-                        if (t == null)
-                        {
-                            t = new Thread(ReceiveMessage.doWork);
-                            t.Start();
-                        }
-                        else
-                        {
-                            if (!t.IsAlive && !Deconnection)
-                            {
-                                t = new Thread(ReceiveMessage.doWork);
-                                t.Start();
-                            }
-                        }
-                        if (ReceiveMessage.message != "")
-                        {
-                            traiterMessagePartie(ReceiveMessage.message.Split(new char[] {'.'}));
-                            ReceiveMessage.message = "";
-                        }
                         verifiervictoireEnnemis();
                     }
                 }
@@ -100,6 +82,21 @@ namespace ServeurWarsOfBaraxa
                     Serveur.games[posPartie].TerminerGame();
                     resetPartie();
                     return true;
+                }
+                int num = Serveur.getPosIndex(posClient, posPartie);
+                int numEnnemi = Serveur.findEnnemis(posClient, posPartie);
+                if (num != -1 && numEnnemi!=-1)
+                {
+                    if (Serveur.games[posPartie].joueurpart[num])
+                    {
+                        acces.AjouterDefaite(Moi.nom);
+                        return true;
+                    }
+                    else if (Serveur.games[posPartie].joueurpart[numEnnemi])
+                    {
+                        acces.AjouterVictoire(Moi.nom);
+                        return true;
+                    }
                 }
             }
             if (Ennemis != null)
@@ -141,6 +138,19 @@ namespace ServeurWarsOfBaraxa
                     partieCommencer = false;
                     Serveur.games[posPartie].TerminerGame();
                     resetPartie();
+                }
+                int num = Serveur.getPosIndex(posClient, posPartie);
+                int numEnnemi = Serveur.findEnnemis(posClient, posPartie);
+                if (num != -1 && numEnnemi != -1)
+                {
+                    if (Serveur.games[posPartie].joueurpart[num])
+                    {
+                        acces.AjouterDefaite(Moi.nom);
+                    }
+                    else if (Serveur.games[posPartie].joueurpart[numEnnemi])
+                    {
+                        acces.AjouterVictoire(Moi.nom);
+                    }
                 }
             }
         }
@@ -270,15 +280,11 @@ namespace ServeurWarsOfBaraxa
                 break;
                 case "deconnection":
                     Deconnection = true;
+                    int num = Serveur.getPosIndex(posClient,posPartie);
+                    if(num !=-1)
+                        Serveur.JoueurPart(num,posPartie);
                     Serveur.tabJoueur[posClient] = null;
-                    Moi = null;
-                    sendClient(Ennemis.sckJoueur, "Carte manquante");
-                    Serveur.games[posPartie].PuCarte = true;
-                    if(t!= null&&t.IsAlive)
-                    {
-                        t.Abort();
-                        t = null;
-                    }
+                    sendClient(Ennemis.sckJoueur, "JePart");
                 break;
             }
 
