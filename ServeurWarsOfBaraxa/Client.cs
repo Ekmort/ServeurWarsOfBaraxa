@@ -66,6 +66,19 @@ namespace ServeurWarsOfBaraxa
                     }
                     else
                     {
+                        if (t == null || !t.IsAlive)
+                        {
+                            t = new Thread(ReceiveMessage.doWork);
+                            t.Start();
+                        }
+                        else
+                        {
+                            if (ReceiveMessage.message != "")
+                            {
+                                traiterMessagePartie(ReceiveMessage.message.Split(new char[] { '.' }));
+                                ReceiveMessage.message = "";
+                            }
+                        }
                         verifiervictoireEnnemis();
                     }
                 }
@@ -83,21 +96,7 @@ namespace ServeurWarsOfBaraxa
                     resetPartie();
                     return true;
                 }
-                int num = Serveur.getPosIndex(posClient, posPartie);
-                int numEnnemi = Serveur.findEnnemis(posClient, posPartie);
-                if (num != -1 && numEnnemi!=-1)
-                {
-                    if (Serveur.games[posPartie].joueurpart[num])
-                    {
-                        acces.AjouterDefaite(Moi.nom);
-                        return true;
-                    }
-                    else if (Serveur.games[posPartie].joueurpart[numEnnemi])
-                    {
-                        acces.AjouterVictoire(Moi.nom);
-                        return true;
-                    }
-                }
+                
             }
             if (Ennemis != null)
             {
@@ -110,12 +109,43 @@ namespace ServeurWarsOfBaraxa
                     return true;
                 }
             }
+            bool estPartie = JoueurPartie();
+            if (estPartie)
+                return true;
+
+            return false;
+        }
+        private bool JoueurPartie()
+        { 
+                int num = Serveur.getPosIndex(posClient, posPartie);
+                int numEnnemi = Serveur.findEnnemis(posClient, posPartie);
+                if (num != -1 && numEnnemi != -1)
+                {
+                    if (Serveur.games[posPartie].joueurpart[num])
+                    {
+                        acces.AjouterDefaite(Moi.nom);
+                        Serveur.games[posPartie].TerminerGame();
+                        resetPartie();
+                        partieCommencer = false;
+                        return true;
+                    }
+                    else if (Serveur.games[posPartie].joueurpart[numEnnemi])
+                    {
+                        acces.AjouterVictoire(Moi.nom);
+                        Serveur.games[posPartie].TerminerGame();
+                        resetPartie();
+                        partieCommencer = false;
+                        return true;
+                    }
+                }
                 return false;
         }
         private void resetPartie()
         {
             posPartie = -1;
             NomDeck="";
+            Moi.vie = 30;
+            Ennemis.vie = 30;
             monDeck = null;
             Ennemis = null;
             Debut = true;
@@ -139,19 +169,7 @@ namespace ServeurWarsOfBaraxa
                     Serveur.games[posPartie].TerminerGame();
                     resetPartie();
                 }
-                int num = Serveur.getPosIndex(posClient, posPartie);
-                int numEnnemi = Serveur.findEnnemis(posClient, posPartie);
-                if (num != -1 && numEnnemi != -1)
-                {
-                    if (Serveur.games[posPartie].joueurpart[num])
-                    {
-                        acces.AjouterDefaite(Moi.nom);
-                    }
-                    else if (Serveur.games[posPartie].joueurpart[numEnnemi])
-                    {
-                        acces.AjouterVictoire(Moi.nom);
-                    }
-                }
+                JoueurPartie();
             }
         }
         //trouve le joueur et lui permet de mulligan(pas encore fait le mulligan)
@@ -286,6 +304,13 @@ namespace ServeurWarsOfBaraxa
                     Serveur.tabJoueur[posClient] = null;
                     sendClient(Ennemis.sckJoueur, "JePart");
                 break;
+                case "surrender":
+                    partieCommencer = false;
+                    int numsurrender = Serveur.getPosIndex(posClient,posPartie);
+                    if (numsurrender != -1)
+                        Serveur.JoueurPart(numsurrender, posPartie);
+                    sendClient(Ennemis.sckJoueur, "JePart");                    
+                break;
             }
 
         }
@@ -334,7 +359,14 @@ namespace ServeurWarsOfBaraxa
                 }
 
             }
-            catch { Console.Write("Erreur de telechargement des données"); }
+            catch 
+            {
+                Serveur.mutex.WaitOne();
+                Console.Write("Erreur de telechargement des donnees");
+                Serveur.tabJoueur.Remove(Moi);
+                Deconnection = true;
+                Serveur.mutex.ReleaseMutex();
+            }
             return carte;
         }
         private void EnvoyerCarte(Socket client, Carte carte)
@@ -564,7 +596,14 @@ namespace ServeurWarsOfBaraxa
                 strData = Encoding.ASCII.GetString(formatted);
             }
             //ne fait rien car le client n'a rien envoyer parcequ'il c'est déconnecter
-            catch (SocketException sock) { }
+            catch (SocketException)
+            {
+                Serveur.mutex.WaitOne();
+                Console.Write("Erreur de telechargement des donnees");
+                Serveur.tabJoueur.Remove(Moi);
+                Deconnection = true;
+                Serveur.mutex.ReleaseMutex();
+            }
             return strData;
         }
         private  void sendClient(Socket client, String text)
@@ -574,7 +613,14 @@ namespace ServeurWarsOfBaraxa
                 byte[] data = Encoding.ASCII.GetBytes(text);
                 client.Send(data);
             }
-            catch { Console.Write("Erreur de telechargement des donnees"); }
+            catch 
+            {
+                Serveur.mutex.WaitOne();
+                Console.Write("Erreur de telechargement des donnees");
+                Serveur.tabJoueur.Remove(Moi);
+                Deconnection = true;
+                Serveur.mutex.ReleaseMutex();
+            }
         }
         private  void sendProfil(string alias)
         {
