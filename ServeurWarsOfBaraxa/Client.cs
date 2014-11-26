@@ -415,6 +415,7 @@ namespace ServeurWarsOfBaraxa
                 case 2:
                 if(data[0] == "afficher profil")
                 {
+                    
                     sendProfil(data[1]);
                 }
                 else if (data[0] == "afficher profil Joueur")
@@ -626,14 +627,29 @@ namespace ServeurWarsOfBaraxa
         {
             Serveur.mutPartie1.WaitOne();
             string profile=acces.getProfil(alias);
-            if (profile != null)
-            {
-                sendClient(Moi.sckJoueur, profile);
-            }
-            else
-            {
-                sendClient(Moi.sckJoueur, "non");
-            }
+            string mess = "";
+
+                /*while (mess == "")
+                {
+                    try
+                    {
+                        Moi.sckJoueur.Blocking = false;*/
+                        if (profile != null)
+                        {
+                            sendClient(Moi.sckJoueur, profile);
+                        }
+                        else
+                        {
+                            sendClient(Moi.sckJoueur, "non");
+                        }
+                        /*mess = recevoirResultat(Moi.sckJoueur);
+                        Moi.sckJoueur.Blocking = true;
+                    }
+                    catch (Exception)
+                    {
+                        mess = "";
+                    }
+                }*/
             Serveur.mutPartie1.ReleaseMutex();
         }
         private  bool aPerdu(Joueur player)
