@@ -197,9 +197,9 @@ namespace ServeurWarsOfBaraxa
         private bool ifHeroDmg(string[] textHabilete)
         {
             bool valide = false; int i = 0;
-            while(!valide || i < textHabilete.Length)
+            while(!valide && i < textHabilete.Length)
             {
-                if (textHabilete[i] == "aux" && textHabilete[i] == "ennemis")
+                if (textHabilete[i] == "aux" && textHabilete[i + 1] == "ennemis")
                     valide = true;
                 else if (textHabilete[i] == "place" && textHabilete[i + 1] == "de" && textHabilete[i + 2] == "combat")
                     valide = true;
@@ -210,7 +210,7 @@ namespace ServeurWarsOfBaraxa
         private bool ifSelfHeroDmg(string[] textHabilete)
         {
             bool valide = false; int i = 0;
-            while (!valide || i < textHabilete.Length)
+            while (!valide && i < textHabilete.Length)
             {
                 if (textHabilete[i] == "place" && textHabilete[i + 1] == "de" && textHabilete[i + 2] == "combat")
                     valide = true;
@@ -233,7 +233,8 @@ namespace ServeurWarsOfBaraxa
                     {
                         if (ifHeroDmg(zeSpell.Habilete.Split(new char[] { ' ' })))
                             Ennemis.vie -= int.Parse(zeSpell.Habilete.Split(new char[] { ' ' })[1]);
-                        if(ifSelfHeroDmg(zeSpell.Habilete.Split(new char[] { ' ' })))
+
+                        if (ifSelfHeroDmg(zeSpell.Habilete.Split(new char[] { ' ' })))
                             Moi.vie -= int.Parse(zeSpell.Habilete.Split(new char[] { ' ' })[1]);
                     }
                     string spellString = SetCarteString(zeSpell);
