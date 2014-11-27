@@ -454,8 +454,9 @@ namespace ServeurWarsOfBaraxa
                     {
                         Serveur.mutPartie1.WaitOne();
                         Carte[] CarteJoueur = acces.ListerDeckJoueur(Moi.nom, numDeck);
-                        Serveur.mutPartie1.ReleaseMutex();
+                        if(CarteJoueur != null && CarteJoueur.Length == 40)
                         monDeck = new Deck(CarteJoueur);
+                        Serveur.mutPartie1.ReleaseMutex();
                     }
                     if (startGame(posClient))
                         partieCommencer = true;
