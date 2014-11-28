@@ -119,7 +119,10 @@ namespace ServeurWarsOfBaraxa
         { 
                 int num = Serveur.getPosIndex(posClient, posPartie);
                 int numEnnemi = Serveur.findEnnemis(posClient, posPartie);
-                if (num != -1 && numEnnemi != -1)
+                int indexEnnemi=-1;
+                if(numEnnemi != -1)
+                    indexEnnemi = Serveur.getPosIndex(numEnnemi, posPartie);
+                if (num != -1 && indexEnnemi != -1)
                 {
                     if (Serveur.games[posPartie].joueurpart[num])
                     {
@@ -129,7 +132,7 @@ namespace ServeurWarsOfBaraxa
                         partieCommencer = false;
                         return true;
                     }
-                    else if (Serveur.games[posPartie].joueurpart[numEnnemi])
+                    else if (Serveur.games[posPartie].joueurpart[indexEnnemi])
                     {
                         acces.AjouterVictoire(Moi.nom);
                         Serveur.games[posPartie].TerminerGame();
@@ -190,7 +193,7 @@ namespace ServeurWarsOfBaraxa
                     string[] data = message.Split(new char[] { '.' });
                 traiterMessagePartie(data);
                 FinTour = verifierVictoire();
-                if (!FinTour || data[0] == "Fin De Tour")
+                if (!FinTour && data[0] == "Fin De Tour")
                     FinTour = true;
             }
         }
@@ -342,31 +345,43 @@ namespace ServeurWarsOfBaraxa
         }
         private Carte ReceiveCarte(Socket client)
         {
+            bool Arecu = false;
+            int atemp = 0;
             Carte carte = null;
-            try
+            while (!Arecu && atemp < 2)
             {
-                byte [] buffer = new byte[client.SendBufferSize];
-                int bytesRead = client.Receive(buffer);
-                byte[] formatted = new byte[bytesRead];
-                BinaryFormatter receive = new BinaryFormatter();
-
-                for (int i = 0; i < bytesRead; i++)
+                try
                 {
-                    formatted[i] = buffer[i];
-                }
-                using (var recstream = new MemoryStream(formatted))
-                {
-                    carte = receive.Deserialize(recstream) as Carte;
-                }
+                    byte[] buffer = new byte[client.SendBufferSize];
+                    int bytesRead = client.Receive(buffer);
+                    byte[] formatted = new byte[bytesRead];
+                    BinaryFormatter receive = new BinaryFormatter();
 
-            }
-            catch 
-            {
-                Serveur.mutex.WaitOne();
-                Console.Write("Erreur de telechargement des donnees");
-                Serveur.tabJoueur.Remove(Moi);
-                Deconnection = true;
-                Serveur.mutex.ReleaseMutex();
+                    for (int i = 0; i < bytesRead; i++)
+                    {
+                        formatted[i] = buffer[i];
+                    }
+                    using (var recstream = new MemoryStream(formatted))
+                    {
+                        carte = receive.Deserialize(recstream) as Carte;
+                    }
+                    Arecu = true;
+                }
+                catch
+                {
+                    if (atemp == 2)
+                    {
+                        Serveur.mutex.WaitOne();
+                        Console.Write("Erreur de telechargement des donnees");
+                        Serveur.tabJoueur.Remove(Moi);
+                        Deconnection = true;
+                        Serveur.mutex.ReleaseMutex();
+                    }
+                    else
+                    {
+                        atemp++;
+                    }
+                }
             }
             return carte;
         }
@@ -587,25 +602,38 @@ namespace ServeurWarsOfBaraxa
         private  string recevoirResultat(Socket client)
         {
             string strData = "";
-            try
+            bool Arecu = false;
+            int atemp = 0;
+            while (atemp < 2 && !Arecu)
             {
-                byte[] buff = new byte[client.SendBufferSize];
-                int bytesRead = client.Receive(buff);
-                byte[] formatted = new byte[bytesRead];
-                for (int i = 0; i < bytesRead; i++)
+                try
                 {
-                    formatted[i] = buff[i];
+                    byte[] buff = new byte[client.SendBufferSize];
+                    int bytesRead = client.Receive(buff);
+                    byte[] formatted = new byte[bytesRead];
+                    for (int i = 0; i < bytesRead; i++)
+                    {
+                        formatted[i] = buff[i];
+                    }
+                    strData = Encoding.ASCII.GetString(formatted);
+                    Arecu = true;
                 }
-                strData = Encoding.ASCII.GetString(formatted);
-            }
-            //ne fait rien car le client n'a rien envoyer parcequ'il c'est déconnecter
-            catch (SocketException)
-            {
-                Serveur.mutex.WaitOne();
-                Console.Write("Erreur de telechargement des donnees");
-                Serveur.tabJoueur.Remove(Moi);
-                Deconnection = true;
-                Serveur.mutex.ReleaseMutex();
+                //ne fait rien car le client n'a rien envoyer parcequ'il c'est déconnecter
+                catch (SocketException)
+                {
+                    if (atemp == 2)
+                    {
+                        Serveur.mutex.WaitOne();
+                        Console.Write("Erreur de telechargement des donnees");
+                        Serveur.tabJoueur.Remove(Moi);
+                        Deconnection = true;
+                        Serveur.mutex.ReleaseMutex();
+                    }
+                    else
+                    {
+                        atemp++;
+                    }
+                }
             }
             return strData;
         }
