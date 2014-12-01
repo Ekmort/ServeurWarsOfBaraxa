@@ -43,6 +43,7 @@ namespace ServeurWarsOfBaraxa
         {
             acces = new AccesBD();
             acces.Connection();
+            acces.Open();
             while (!Deconnection)
             {
                 if (!partieCommencer)
@@ -83,6 +84,7 @@ namespace ServeurWarsOfBaraxa
                     }
                 }
             }
+            acces.close();
         }
         private bool verifierVictoire()
         {
@@ -373,6 +375,7 @@ namespace ServeurWarsOfBaraxa
                     {
                         Serveur.mutex.WaitOne();
                         Console.Write("Erreur de telechargement des donnees");
+                        acces.close();
                         Serveur.tabJoueur.Remove(Moi);
                         Deconnection = true;
                         Serveur.mutex.ReleaseMutex();
@@ -469,6 +472,8 @@ namespace ServeurWarsOfBaraxa
                     if (numDeck != -1)
                     {
                         Serveur.mutPartie1.WaitOne();
+                        acces.close();
+                        acces.Open();
                         Carte[] CarteJoueur = acces.ListerDeckJoueur(Moi.nom, numDeck);
                         if(CarteJoueur != null && CarteJoueur.Length == 40)
                         monDeck = new Deck(CarteJoueur);
@@ -625,6 +630,7 @@ namespace ServeurWarsOfBaraxa
                     {
                         Serveur.mutex.WaitOne();
                         Console.Write("Erreur de telechargement des donnees");
+                        acces.close();
                         Serveur.tabJoueur.Remove(Moi);
                         Deconnection = true;
                         Serveur.mutex.ReleaseMutex();
@@ -650,6 +656,7 @@ namespace ServeurWarsOfBaraxa
                 Console.Write("Erreur de telechargement des donnees");
                 Serveur.tabJoueur.Remove(Moi);
                 Deconnection = true;
+                acces.close();
                 Serveur.mutex.ReleaseMutex();
             }
         }

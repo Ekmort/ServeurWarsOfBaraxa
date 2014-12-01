@@ -208,6 +208,10 @@ namespace ServeurWarsOfBaraxa
             PartieDemarre = false;
             indexJoueur[0] = -1;
             indexJoueur[1] = -1;
+            joueurpart[0] = false;
+            joueurpart[1] = false;
+            rand = -1;
+
         }
         public int setRandom()
         {
