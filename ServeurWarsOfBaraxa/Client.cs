@@ -231,7 +231,7 @@ namespace ServeurWarsOfBaraxa
                     sendClient(Ennemis.sckJoueur, "AjouterManaEnnemis." + Moi.nbBle + "." + Moi.nbBois + "." + Moi.nbGem);
                     break;
                 case "Jouer spellnotarget":
-                    Carte zeSpell = ReceiveCarte(Moi.sckJoueur);
+                    Carte zeSpell = createCarte(data, 2);
                     EnleverMana(Moi, zeSpell);
                     if (zeSpell.Habilete.Split(new char[] { ' ' })[0] == "Inflige")
                     {
@@ -245,7 +245,7 @@ namespace ServeurWarsOfBaraxa
                     sendClient(Ennemis.sckJoueur, "spellNoTarget." + data[1] + "." + spellString);
                     break;
                 case "Jouer spellTarget":
-                    Carte zeSpelltarget = ReceiveCarte(Moi.sckJoueur);
+                    Carte zeSpelltarget = createCarte(data, 3);
                     EnleverMana(Moi, zeSpelltarget);
                     if (data[2] == "hero ennemis" || data[2] == "hero")
                     {
@@ -262,7 +262,7 @@ namespace ServeurWarsOfBaraxa
                     }
                     else
                     {
-                        Carte zeTarget = ReceiveCarte(Moi.sckJoueur);
+                        Carte zeTarget = createCarte(data,10);
                         string spelltargetString = SetCarteString(zeSpelltarget);
                         string targetString = SetCarteString(zeTarget);
                         sendClient(Ennemis.sckJoueur, "spellwithtarget." + data[1] + "." + data[2] + "." + spelltargetString + "." + targetString);
@@ -319,6 +319,17 @@ namespace ServeurWarsOfBaraxa
             }
 
        }
+        private Carte createCarte(string[] data, int posDepart)
+        {
+            Carte zeCarte = null;
+            if (data.Length >= posDepart + 6)
+            {
+                zeCarte = new Carte(int.Parse(data[posDepart + 6]), data[posDepart + 5], data[posDepart + 4], data[posDepart + 3], int.Parse(data[posDepart]), int.Parse(data[posDepart + 1]), int.Parse(data[posDepart + 2]));
+                if (zeCarte.TypeCarte == "Permanents" || zeCarte.TypeCarte == "creature" || zeCarte.TypeCarte == "batiment" || zeCarte.TypeCarte == "Permanent")
+                    zeCarte.perm = new Permanent(data[posDepart + 10], int.Parse(data[posDepart + 7]), int.Parse(data[posDepart + 8]), int.Parse(data[posDepart + 9]));
+            }
+            return zeCarte;
+        }
         private Carte setHabilete(Carte card)
         {
             if (card.Habilete != "" && card.Habilete != null)
