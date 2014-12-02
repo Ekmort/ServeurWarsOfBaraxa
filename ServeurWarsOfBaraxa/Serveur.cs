@@ -183,9 +183,10 @@ namespace ServeurWarsOfBaraxa
         public int[] indexJoueur;
         public int rand;
         public bool[] joueurpart;
-
+        public Mutex mutpartie;
         public gameEtat()
         {
+            mutpartie = new Mutex();
             inactif = false;
             PuCarte = false;
             PartieDemarre = false;
