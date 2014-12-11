@@ -43,7 +43,7 @@ namespace ServeurWarsOfBaraxa
             tabPartie = new List<Joueur>();
             games = new List<gameEtat>();
             sck = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            sck.Bind(new IPEndPoint(0, 50054));
+            sck.Bind(new IPEndPoint(0, 1234));
             sck.Listen(1000);
             Console.WriteLine("En attente de connexion");
             Thread t;
